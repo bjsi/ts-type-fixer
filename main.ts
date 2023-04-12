@@ -69,7 +69,7 @@ const runAction = async (
     (x) => x.type === "Action Input"
   )?.data;
   const schema = tool.type;
-  const maybeArgs = schema.safeParse(actionInput);
+  const maybeArgs = schema!.safeParse(actionInput);
   if (!maybeArgs.success) {
     return {
       success: false,
@@ -79,7 +79,8 @@ const runAction = async (
 
   console.log("Running tool", action);
   const output = await tool.run(maybeArgs.data as any);
-  const ret = JSON.stringify({ Observation: output }, null, 2);
+  const observation = output.success ? output.data : output;
+  const ret = JSON.stringify({ Observation: observation }, null, 2);
   console.log("Tool output", ret);
   return {
     success: true,
@@ -112,6 +113,12 @@ async function main() {
 
     const answer = await getInput("Do you want to continue? (y/n) ");
     if (answer.toLowerCase() !== "y") {
+      break;
+    }
+
+    const action = R.findLast(parsed, (x) => x.type === "Action")?.data;
+    if (action === "next_type_error") {
+      console.log("Done!!!");
       break;
     }
 

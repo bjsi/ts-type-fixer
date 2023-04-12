@@ -50,17 +50,21 @@ Fix the following type errors in a messy typescript codebase. You have access to
 
 ${Object.entries(fixTypesTools)
   .map(([name, tool]) => {
-    const args = getToolArgsString(tool.type);
-    return `${name}: (args: ${args}) => string`;
+    if (tool.type) {
+      const args = getToolArgsString(tool.type);
+      return `${name}: (args: ${args}) => string`;
+    } else {
+      return `${name}`;
+    }
   })
   .join("\n")}
+next_type_error: () => void
 
 Use the following format:
 
 Type error: the type error you must fix
 Thought: you should always think about what to do
 Action: the action to take
-Criticism: you should always criticise your thought and action to make sure it is correct
 ...Thought/Action/Criticism may repeat N times
 Action Input: the args for the action
 Observation: the result of the action
