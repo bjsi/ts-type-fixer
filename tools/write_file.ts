@@ -15,7 +15,7 @@ export function write_text_to_file(args: Args): Success<string> | Fail<string> {
   const { file, line, text, mode } = args;
 
   if (!fs.existsSync(file)) {
-    return `File does not exist: ${file}`;
+    return { success: false, error: `File does not exist: ${file}` };
   }
 
   const fileContent = fs.readFileSync(file, "utf-8");
