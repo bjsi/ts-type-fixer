@@ -10,7 +10,7 @@ describe("formatParsedText", () => {
         type: "Thought",
         data: "I need to find the line of code causing the type error in the file Queue.tsx.",
       },
-      { type: "Criticism", data: "I don't know what to do" },
+      { type: "Check", data: "I don't know what to do" },
       { type: "Thought", data: "Something else" },
       { type: "Action", data: "get_source_code_at_line" },
       {
@@ -25,7 +25,7 @@ describe("formatParsedText", () => {
     const output = parsedOutputToString(t1);
     expect(output).toEqual(
       `Thought: I need to find the line of code causing the type error in the file Queue.tsx.
-Criticism: I don't know what to do
+Check: I don't know what to do
 Thought: Something else
 Action: get_source_code_at_line
 Action Input: {

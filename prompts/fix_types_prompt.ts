@@ -46,7 +46,7 @@ export const fixTypesPrompt: ChatCompletionRequestMessage[] = [
   {
     role: "system",
     content: `
-Fix the following type errors in a messy typescript codebase. You have access to the following actions:
+You are fixing type errors in a TypeScript project. You have access to the following actions:
 
 ${Object.entries(fixTypesTools)
   .map(([name, tool]) => {
@@ -58,23 +58,22 @@ ${Object.entries(fixTypesTools)
     }
   })
   .join("\n")}
-next_type_error: () => void
 
 Use the following format:
 
 Type error: the type error you must fix
-Thought: you should always think about what to do
+Thought: you should always think step-by-step about what to do
+Check: you should always criticise your thought to make sure it's correct
 Action: the action to take
-...Thought/Action/Criticism may repeat N times
 Action Input: the args for the action
-Observation: the result of the action
+Observation: the result of the action, provided by the user
 `.trim(),
   },
 ];
 
 export type ParsedOutputItem =
   | { type: "Thought"; data: string | undefined }
-  | { type: "Criticism"; data: string | undefined }
+  | { type: "Check"; data: string | undefined }
   | { type: "Action"; data: string | undefined }
   | { type: "Action Input"; data: any };
 
@@ -96,26 +95,47 @@ export function parseText(text: string): ParsedOutput | null {
     const regexes: [RegExp, (match: RegExpMatchArray) => void][] = [
       [
         /Thought: (.+)/,
-        (match: RegExpMatchArray) =>
-          output.push({ type: "Thought", data: match[1] }),
+        (match: RegExpMatchArray) => {
+          output.push({ type: "Thought", data: match[1] });
+          updateLatestMatchIdx(match);
+        },
       ],
       [
-        /Criticism: (.+)/,
-        (match: RegExpMatchArray) =>
-          output.push({ type: "Criticism", data: match[1] }),
+        /Check: (.+)/,
+        (match: RegExpMatchArray) => {
+          output.push({ type: "Check", data: match[1] });
+          updateLatestMatchIdx(match);
+        },
       ],
       [
         /Action: (.+)/,
-        (match: RegExpMatchArray) =>
-          output.push({ type: "Action", data: match[1] }),
+        (match: RegExpMatchArray) => {
+          output.push({ type: "Action", data: match[1] });
+          updateLatestMatchIdx(match);
+        },
       ],
       [
-        /Action Input: (\{[^}]+\})/,
+        /Action Input:/,
         (match: RegExpMatchArray) => {
-          const actionInput = JSON.parse(
-            match?.[1]?.replace(/(\r\n|\n|\r)/gm, "") || ""
-          );
+          // couldn't get regex to work because of { } inside the JSON
+          const actionInputStartIdx = match.index! + match[0].length;
+          const section = textSection.slice(actionInputStartIdx);
+          let actionInputEndIdx: number = section.length;
+          for (const el of [
+            "Thought",
+            "Check",
+            "Action",
+            "Action Input",
+            "Observation",
+          ]) {
+            const idx = section.indexOf(el);
+            if (idx !== -1 && idx < actionInputEndIdx) {
+              actionInputEndIdx = idx;
+            }
+          }
+          const actionInput = JSON.parse(section.slice(0, actionInputEndIdx));
           output.push({ type: "Action Input", data: actionInput });
+          latestMatchIdx = actionInputStartIdx + actionInputEndIdx;
         },
       ],
     ];
@@ -133,7 +153,6 @@ export function parseText(text: string): ParsedOutput | null {
     } else {
       const [match, cb] = R.sortBy(matches, ([match]) => match.index!)[0];
       cb(match);
-      updateLatestMatchIdx(match);
     }
   }
 
@@ -148,8 +167,8 @@ export function parsedOutputToString(parsedOutput: ParsedOutput): string {
       case "Thought":
         result += `Thought: ${item.data}\n`;
         break;
-      case "Criticism":
-        result += `Criticism: ${item.data}\n`;
+      case "Check":
+        result += `Check: ${item.data}\n`;
         break;
       case "Action":
         result += `Action: ${item.data}\n`;
