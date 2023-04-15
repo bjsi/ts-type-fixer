@@ -70,7 +70,3 @@ export function get_source_code_for_type_or_interface(
     };
   }
 }
-
-get_source_code_for_type_or_interface({
-  names: ["SyncedCollectionInterface"],
-});

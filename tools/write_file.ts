@@ -6,7 +6,11 @@ export const write_text_to_file_schema = z.object({
   file: z.string(),
   line: z.number(),
   text: z.string(),
-  mode: z.union([z.literal("insertAfter"), z.literal("replace")]),
+  mode: z.union([
+    z.literal("insertBefore"),
+    z.literal("insertAfter"),
+    z.literal("replace"),
+  ]),
 });
 
 type Args = z.infer<typeof write_text_to_file_schema>;
@@ -25,6 +29,8 @@ export function write_text_to_file(args: Args): Success<string> | Fail<string> {
 
   if (mode === "insertAfter") {
     lines.splice(line, 0, ...newTextLines);
+  } else if (mode === "insertBefore") {
+    lines.splice(line - 1, 0, ...newTextLines);
   } else if (mode === "replace") {
     lines.splice(line - 1, newTextLines.length, ...newTextLines);
   } else {

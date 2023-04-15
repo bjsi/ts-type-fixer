@@ -10,12 +10,11 @@ export const no_dir_search_schema = z.object({
   gitignore: z.string().optional(),
 });
 
-export const search_schema = z.object({
-  query: z.string(),
-  mode: z.union([z.literal("fuzzy"), z.literal("exact")]),
-  directory: z.string(),
-  gitignore: z.string().optional(),
-});
+export const search_schema = no_dir_search_schema.merge(
+  z.object({
+    directory: z.string(),
+  })
+);
 
 export type SearchArgs = z.infer<typeof search_schema>;
 
@@ -33,7 +32,7 @@ export async function search(
         .filter((x) => !!x.trim() && !x.startsWith("#") && !x.includes("!"));
       ignores = lines.map((x) => '--ignore="' + x + '"').join(" ");
     }
-    const fuzzy = `rg --glob '*.ts' --glob '*.tsx' . ${
+    const fuzzy = `rg -n --glob '*.ts' --glob '*.tsx' . ${
       args.directory || "."
     } | fzf --filter "${args.query}" | head -n 16`;
     console.log(fuzzy);
