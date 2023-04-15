@@ -14,6 +14,7 @@ import {
 } from "../tools/write_file";
 import { get_next_type_error } from "../types";
 import { getToolArgsString } from "./shared";
+import { task_complete, task_complete_schema } from "../tools/task_complete";
 
 export const fixTypesTools = {
   search: {
@@ -36,6 +37,10 @@ export const fixTypesTools = {
   write_text_to_file: {
     run: write_text_to_file,
     type: write_text_to_file_schema,
+  },
+  task_complete: {
+    run: task_complete,
+    type: task_complete_schema,
   },
 };
 

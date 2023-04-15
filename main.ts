@@ -110,12 +110,11 @@ async function main() {
     }
 
     const action = R.findLast(parsed, (x) => x.type === "Action")?.data;
-    if (action === "next_type_error") {
+    const actionOutput = await runAction(parsed);
+    if (action === "task_complete") {
       console.log("Done!!!");
       break;
     }
-
-    const actionOutput = await runAction(parsed);
     let actionOutputStr = "";
     if (!actionOutput.success) {
       actionOutputStr = actionOutput.error;
