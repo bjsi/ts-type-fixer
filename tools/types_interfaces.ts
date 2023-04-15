@@ -29,33 +29,36 @@ export function get_source_code_for_type_or_interface(
   const { names } = args;
   const ret: TypeOrInterfaceInfo[] = [];
   for (const name of names) {
-    const typefile = project
+    const typefiles = project
       .getSourceFiles()
-      .find((file) => file.getTypeAlias(name) || file.getInterface(name));
-    if (!typefile) {
+      .filter((file) => file.getTypeAlias(name) || file.getInterface(name));
+    if (typefiles.length === 0) {
       continue;
     }
-    const type = typefile.getTypeAlias(name) || typefile.getInterface(name);
-    const addInfo = (type: TypeAliasDeclaration | InterfaceDeclaration) => {
-      const lineNumber = type.getStartLineNumber();
-      const file = typefile.getFilePath();
-      const text = type.getText();
-      const code = text
-        .split("\n")
-        .map((line: string, index: number) => {
-          return `${lineNumber + index}: ${line}`;
-        })
-        .join("\n");
-      ret.push({
-        code,
-        startLine: lineNumber,
-        endLine: lineNumber + text.split("\n").length,
-        file,
-      });
-    };
 
-    if (type) {
-      addInfo(type);
+    for (const typefile of typefiles) {
+      const type = typefile.getTypeAlias(name) || typefile.getInterface(name);
+      const addInfo = (type: TypeAliasDeclaration | InterfaceDeclaration) => {
+        const lineNumber = type.getStartLineNumber();
+        const file = typefile.getFilePath();
+        const text = type.getText();
+        const code = text
+          .split("\n")
+          .map((line: string, index: number) => {
+            return `${lineNumber + index}: ${line}`;
+          })
+          .join("\n");
+        ret.push({
+          code,
+          startLine: lineNumber,
+          endLine: lineNumber + text.split("\n").length,
+          file,
+        });
+      };
+
+      if (type) {
+        addInfo(type);
+      }
     }
   }
   if (ret.length > 0) {

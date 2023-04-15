@@ -7,6 +7,7 @@ import { Success, Fail } from "../types/types";
 export const no_dir_search_schema = z.object({
   query: z.string(),
   mode: z.union([z.literal("fuzzy"), z.literal("exact")]),
+  file: z.string().optional(),
 });
 
 export const search_schema = no_dir_search_schema.merge(
@@ -23,19 +24,12 @@ export async function search(
 ): Promise<Success<string> | Fail<string>> {
   try {
     const execPromise = promisify(exec);
-    const exact = `rg -n '${args.query}' ${args.directory || "."} | head -n 16`;
-    let ignores = "";
-    if (args.gitignore) {
-      const text = fs.readFileSync(args.gitignore, "utf8");
-      const lines = text
-        .split("\n")
-        .filter((x) => !!x.trim() && !x.startsWith("#") && !x.includes("!"));
-      ignores = lines.map((x) => '--ignore="' + x + '"').join(" ");
-    }
+    const exact = `rg -n '${args.query}' ${
+      args.file ?? args.directory ?? "."
+    } | head -n 21`;
     const fuzzy = `rg -n --glob '*.ts' --glob '*.tsx' . ${
-      args.directory || "."
-    } | fzf --filter "${args.query}" | head -n 16`;
-    console.log(fuzzy);
+      args.file ?? args.directory ?? "."
+    } | fzf --filter "${args.query}" | head -n 21`;
     const { stdout } = await execPromise(args.mode === "exact" ? exact : fuzzy);
     const data = stdout.trim();
     if (data.length === 0) {
@@ -47,8 +41,8 @@ export async function search(
       return {
         success: true,
         data:
-          stdout.split("\n").length > 15
-            ? stdout.split("\n").slice(0, 15).join("\n") +
+          stdout.split("\n").length > 20
+            ? stdout.split("\n").slice(0, 20).join("\n") +
               "\n...more results truncated"
             : stdout,
       };
