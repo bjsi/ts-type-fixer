@@ -1,5 +1,4 @@
 import { exec } from "child_process";
-import * as fs from "fs";
 import { promisify } from "util";
 import { z } from "zod";
 import { Success, Fail } from "../types/types";
@@ -9,6 +8,12 @@ export const no_dir_search_schema = z.object({
   mode: z.union([z.literal("fuzzy"), z.literal("exact")]),
   file: z.string().optional(),
 });
+
+export const search_file_schema = no_dir_search_schema.merge(
+  z.object({
+    file: z.string(),
+  })
+);
 
 export const search_schema = no_dir_search_schema.merge(
   z.object({

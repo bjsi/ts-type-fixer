@@ -2,7 +2,11 @@ import {
   get_source_code_at_line,
   get_source_code_at_line_schema,
 } from "../tools/get_source_code";
-import { no_dir_search_schema, search } from "../tools/search";
+import {
+  no_dir_search_schema,
+  search,
+  search_file_schema,
+} from "../tools/search";
 import {
   get_source_code_for_type_or_interface,
   get_source_code_for_type_or_interface_schema,
@@ -17,7 +21,7 @@ import { getToolArgsString } from "./shared";
 import { task_complete, task_complete_schema } from "../tools/task_complete";
 
 export const fixTypesTools = {
-  search: {
+  search_all: {
     run: (args: any) =>
       search({
         ...args,
@@ -26,15 +30,24 @@ export const fixTypesTools = {
       }),
     type: no_dir_search_schema,
   },
-  get_source_code_at_line: {
+  search_file: {
+    run: (args: any) =>
+      search({
+        ...args,
+        directory: "/home/james/Projects/TS/remnote-new/client",
+        gitignore: "/home/james/Projects/TS/remnote-new/.gitignore",
+      }),
+    type: search_file_schema,
+  },
+  get_code_at_line: {
     run: get_source_code_at_line,
     type: get_source_code_at_line_schema,
   },
-  get_source_code_for_type_or_interface: {
+  get_type_or_interface: {
     run: get_source_code_for_type_or_interface,
     type: get_source_code_for_type_or_interface_schema,
   },
-  write_code_in_file: {
+  write_file: {
     run: write_text_to_file,
     type: write_text_to_file_schema,
   },
@@ -63,7 +76,7 @@ ${Object.entries(fixTypesTools)
 
 Use the following format for each response. All fields are required. Only give one action per response. Assume the type error is not a mistake with the compiler:
 
-Thought: you should always think step-by-step about what to do
+Thought: you should always plan your action step-by-step
 Check: you *must* criticise your thought to make sure it's correct
 (...Thought and Check may repeat N times)
 Action: the action to take
