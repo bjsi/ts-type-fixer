@@ -6,6 +6,9 @@ const project = new Project();
 project.addSourceFilesAtPaths(
   "/home/james/Projects/TS/remnote-new/client/**/*.ts"
 );
+project.addSourceFilesAtPaths(
+  "/home/james/Projects/TS/remnote-new/client/**/*.tsx"
+);
 
 export const get_source_code_for_type_or_interface_schema = z.object({
   names: z.array(z.string()),
@@ -15,7 +18,8 @@ type Args = z.infer<typeof get_source_code_for_type_or_interface_schema>;
 
 interface TypeOrInterfaceInfo {
   code: string;
-  line: number;
+  startLine: number;
+  endLine: number;
   file: string;
 }
 
@@ -31,12 +35,11 @@ export function get_source_code_for_type_or_interface(
     if (!typefile) {
       continue;
     }
-    const type = typefile.getTypeAlias(name);
+    const type = typefile.getTypeAlias(name) || typefile.getInterface(name);
     const addInfo = (type: TypeAliasDeclaration | InterfaceDeclaration) => {
       const lineNumber = type.getStartLineNumber();
       const file = typefile.getFilePath();
       const text = type.getText();
-      console.log(text);
       const code = text
         .split("\n")
         .map((line: string, index: number) => {
@@ -45,17 +48,14 @@ export function get_source_code_for_type_or_interface(
         .join("\n");
       ret.push({
         code,
-        line: lineNumber,
+        startLine: lineNumber,
+        endLine: lineNumber + text.split("\n").length,
         file,
       });
     };
 
     if (type) {
       addInfo(type);
-    }
-    const inter = typefile?.getInterface(name);
-    if (inter) {
-      addInfo(inter);
     }
   }
   if (ret.length > 0) {

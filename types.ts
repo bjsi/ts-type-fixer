@@ -1,6 +1,6 @@
 import { Project } from "ts-morph";
 
-export function get_next_type_error() {
+export function get_all_type_errors(file: string) {
   const project = new Project({
     tsConfigFilePath:
       "/home/james/Projects/TS/remnote-new/client/tsconfig.json",
@@ -8,15 +8,12 @@ export function get_next_type_error() {
   });
 
   project.addSourceFilesAtPaths([
-    "/home/james/Projects/TS/remnote-new/client/src/js/ui/queue/Queue.tsx",
+    file,
     "/home/james/Projects/TS/remnote-new/client/src/global.d.ts",
   ]);
-  const srcFile = project.getSourceFile(
-    "/home/james/Projects/TS/remnote-new/client/src/js/ui/queue/Queue.tsx"
-  )!;
+  const srcFile = project.getSourceFile(file)!;
   const errors = srcFile!.getPreEmitDiagnostics();
-  if (errors.length > 0) {
-    const error = errors[0];
+  return errors.map((error) => {
     const messageText = error.getMessageText();
     const error_message =
       typeof messageText === "string"
@@ -25,8 +22,16 @@ export function get_next_type_error() {
     const file = error.getSourceFile()?.getFilePath();
     const line = error.getLineNumber();
     return { error_message, file, line };
+  });
+}
+
+export function get_next_type_error(file: string) {
+  const es = get_all_type_errors(file);
+  if (es.length === 0) {
+    return {
+      message: "No type errors",
+    };
+  } else {
+    return es[0];
   }
-  return {
-    message: "No type errors found!",
-  };
 }

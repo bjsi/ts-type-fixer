@@ -58,18 +58,21 @@ export function parseText(text: string): ParsedOutput | null {
           const actionInputStartIdx = match.index! + match[0].length;
           const section = textSection.slice(actionInputStartIdx);
           let actionInputEndIdx: number = section.length;
+          // dumb way to find the end of the JSON
+          // what if the JSON has "Thought:" in it etc?
           for (const el of [
-            "Thought",
-            "Check",
-            "Action",
-            "Action Input",
-            "Observation",
+            "Thought:",
+            "Check:",
+            "Action:",
+            "Action Input:",
+            "Observation:",
           ]) {
             const idx = section.indexOf(el);
             if (idx !== -1 && idx < actionInputEndIdx) {
               actionInputEndIdx = idx;
             }
           }
+          debugger;
           const actionInput = JSON.parse(section.slice(0, actionInputEndIdx));
           output.push({ type: "Action Input", data: actionInput });
           latestMatchIdx = actionInputStartIdx + actionInputEndIdx;

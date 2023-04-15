@@ -48,7 +48,7 @@ ${Object.entries(writePluginTools)
   })
   .join("\n")}
 
-Use the following format. Only give one action per response:
+Use the following format. All fields are required. Only give one action per response:
 
 Thought: you should always think step-by-step about what to do
 Check: you should always criticise your thought to make sure it's correct

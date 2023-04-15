@@ -6,7 +6,7 @@ describe("parseText", () => {
 Thought: I need to find the line of code causing the type error in the file Queue.tsx.
 
 Action: get_source_code_at_line
-Action Input: {"file": "Queue.tsx","line": 982,"range": 1},
+Action Input: {"file": "Queue.tsx","line": 982,"range": 1}
 Observation: const card = this.getCard()
 `.trim();
     const output = parseText(t1);
@@ -56,5 +56,33 @@ Action Input: {
         },
       },
     ]);
+  });
+
+  it("parses text", () => {
+    const t1 = `
+Thought: I see that the error is related to the QueueActionItem component. I need to find the definition of QueueActionItemProps to understand what is required.
+Action: get_source_code_for_type_or_interface
+Action Input: {
+  "names": ["QueueActionItemProps"]
+}`.trim();
+    const actual = parseText(t1);
+    const expected = [
+      {
+        type: "Thought",
+
+        data: "I see that the error is related to the QueueActionItem component. I need to find the definition of QueueActionItemProps to understand what is required.",
+      },
+      {
+        type: "Action",
+        data: "get_source_code_for_type_or_interface",
+      },
+      {
+        type: "Action Input",
+        data: {
+          names: ["QueueActionItemProps"],
+        },
+      },
+    ];
+    expect(actual).toEqual(expected);
   });
 });

@@ -43,8 +43,9 @@ const runAction = async (
     return {
       success: false,
       error: `
-Error: Please provide an action
+Error: Please provide an Action and ActionInput in each response!
 Action: the action to take
+ActionInput: the input to the action
 `.trim(),
     };
   }
@@ -65,7 +66,7 @@ Action: the action to take
   if (!maybeArgs.success) {
     return {
       success: false,
-      error: "Invalid input",
+      error: "Invalid input: " + maybeArgs.error.message,
     };
   }
 

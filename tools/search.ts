@@ -7,12 +7,12 @@ import { Success, Fail } from "../types/types";
 export const no_dir_search_schema = z.object({
   query: z.string(),
   mode: z.union([z.literal("fuzzy"), z.literal("exact")]),
-  gitignore: z.string().optional(),
 });
 
 export const search_schema = no_dir_search_schema.merge(
   z.object({
     directory: z.string(),
+    gitignore: z.string().optional(),
   })
 );
 
