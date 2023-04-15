@@ -1,7 +1,4 @@
-import {
-  ParsedOutput,
-  parsedOutputToString,
-} from "../prompts/fix_types_prompt";
+import { ParsedOutput, parsedOutputToString } from "../prompts/shared";
 
 describe("formatParsedText", () => {
   it("formats parsed text", () => {

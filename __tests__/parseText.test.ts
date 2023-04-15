@@ -1,4 +1,4 @@
-import { parseText } from "../prompts/fix_types_prompt";
+import { parseText } from "../prompts/shared";
 
 describe("parseText", () => {
   it("parses text", () => {

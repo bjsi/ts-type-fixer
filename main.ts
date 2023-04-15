@@ -1,30 +1,18 @@
 import { ChatCompletionRequestMessage } from "openai";
-import * as readline from "readline";
 import { chat } from "./openai";
+import * as R from "remeda";
+import { Success, Fail } from "./types/types";
+import {
+  parseText,
+  ParsedOutput,
+  parsedOutputToString,
+} from "./prompts/shared";
 import {
   createTypeErrorObservation,
   fixTypesPrompt,
   fixTypesTools,
-  ParsedOutput,
-  parsedOutputToString,
-  parseText,
 } from "./prompts/fix_types_prompt";
-import * as R from "remeda";
-import { Success, Fail } from "./types/types";
-
-function getInput(prompt: string): Promise<string> {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  return new Promise((resolve) => {
-    rl.question(prompt, (answer) => {
-      rl.close();
-      resolve(answer);
-    });
-  });
-}
+import { confirmContinue } from "./getHumanInput";
 
 const callGpt = async (prompt: ChatCompletionRequestMessage[]) => {
   const response = await chat(prompt, false, "gpt-4");
@@ -54,14 +42,18 @@ const runAction = async (
   if (!action) {
     return {
       success: false,
-      error: "No action found",
+      error: `
+Error: Please provide an action
+Action: the action to take
+`.trim(),
     };
   }
   const tool = fixTypesTools[action as keyof typeof fixTypesTools];
   if (!tool) {
     return {
       success: false,
-      error: "No matching action found",
+      error:
+        "Error: No matching action found. Please only use the actions provided.",
     };
   }
   const actionInput = R.findLast(
@@ -91,9 +83,11 @@ const runAction = async (
 async function main() {
   let keepGoing = true;
 
+  const firstTypeError = createTypeErrorObservation();
+
   const prompt: ChatCompletionRequestMessage[] = [
     ...fixTypesPrompt,
-    createTypeErrorObservation(),
+    firstTypeError,
   ];
 
   while (keepGoing) {
@@ -111,8 +105,7 @@ async function main() {
       content: parsedOutputToString(parsed),
     });
 
-    const answer = await getInput("Do you want to continue? (y/n) ");
-    if (answer.toLowerCase() !== "y") {
+    if (!(await confirmContinue())) {
       break;
     }
 
