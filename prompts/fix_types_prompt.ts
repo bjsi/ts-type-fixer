@@ -58,8 +58,8 @@ ${Object.entries(fixTypesTools)
 
 Use the following format for each response:
 
-Thought: you should always think step-by-step about what to do
-Check: you *must* criticise your thought to make sure it's correct, especially before writing code
+Thought: you should always think step-by-step about what to do and consider alternative explanations for the issue.
+Check: you *must* evaluate your thought and consider alternative explanations, look for additional evidence in the codebase and make sure it's correct, especially before writing code.
 Action: the action to take
 Action Input: the args for the action
 `.trim(),

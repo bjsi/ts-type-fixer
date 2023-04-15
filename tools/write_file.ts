@@ -24,7 +24,7 @@ export function write_text_to_file(args: Args): Success<string> | Fail<string> {
   const newTextLines = text.split("\n");
 
   if (mode === "insertAfter") {
-    lines.splice(line - 1, 0, ...newTextLines);
+    lines.splice(line, 0, ...newTextLines);
   } else if (mode === "replace") {
     lines.splice(line - 1, newTextLines.length, ...newTextLines);
   } else {
