@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "dev": "export NODE_OPTIONS=--max_old_space_size=4096 ts-node main.ts"
   },
   "author": "",
   "license": "ISC",

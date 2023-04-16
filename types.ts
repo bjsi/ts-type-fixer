@@ -1,4 +1,4 @@
-import { Project } from "ts-morph";
+import { DiagnosticMessageChain, Project } from "ts-morph";
 
 export function get_all_type_errors(file: string) {
   const project = new Project({
@@ -14,11 +14,21 @@ export function get_all_type_errors(file: string) {
   const srcFile = project.getSourceFile(file)!;
   const errors = srcFile!.getPreEmitDiagnostics();
   return errors.map((error) => {
-    const messageText = error.getMessageText();
-    const error_message =
-      typeof messageText === "string"
-        ? messageText
-        : messageText.getMessageText();
+    const diagnostic = error.getMessageText();
+    let error_message = "";
+    if (typeof diagnostic === "string") {
+      error_message = diagnostic;
+    } else {
+      const recursivelyConcatErrorMsg = (
+        diagnosticMessage: DiagnosticMessageChain
+      ) => {
+        const message = diagnosticMessage.getMessageText();
+        error_message += message + "\n";
+        (diagnosticMessage.getNext() || []).forEach(recursivelyConcatErrorMsg);
+      };
+      recursivelyConcatErrorMsg(diagnostic);
+    }
+
     const file = error.getSourceFile()?.getFilePath();
     const line = error.getLineNumber();
     return { error_message, file, line };
@@ -35,3 +45,9 @@ export function get_next_type_error(file: string) {
     return es[0];
   }
 }
+
+console.log(
+  get_next_type_error(
+    "/home/james/Projects/TS/remnote-new/client/src/js/ui/queue/Queue.tsx"
+  )
+);
