@@ -1,5 +1,10 @@
 import { z } from "zod";
-import { InterfaceDeclaration, Project, TypeAliasDeclaration } from "ts-morph";
+import {
+  EnumDeclaration,
+  InterfaceDeclaration,
+  Project,
+  TypeAliasDeclaration,
+} from "ts-morph";
 import { Fail, Success } from "../types/types";
 
 const project = new Project();
@@ -32,7 +37,9 @@ export function get_source_code_for_type_or_interface(
     .getSourceFiles()
     .filter(
       (file) =>
-        file.getTypeAlias(typeOrInterface) || file.getInterface(typeOrInterface)
+        file.getTypeAlias(typeOrInterface) ||
+        file.getInterface(typeOrInterface) ||
+        file.getEnum(typeOrInterface)
     );
   if (typefiles.length === 0) {
     return {
@@ -44,8 +51,11 @@ export function get_source_code_for_type_or_interface(
   for (const typefile of typefiles) {
     const type =
       typefile.getTypeAlias(typeOrInterface) ||
-      typefile.getInterface(typeOrInterface);
-    const addInfo = (type: TypeAliasDeclaration | InterfaceDeclaration) => {
+      typefile.getInterface(typeOrInterface) ||
+      typefile.getEnum(typeOrInterface);
+    const addInfo = (
+      type: TypeAliasDeclaration | InterfaceDeclaration | EnumDeclaration
+    ) => {
       const lineNumber = type.getStartLineNumber();
       const file = typefile.getFilePath();
       const text = type.getText();

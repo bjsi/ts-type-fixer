@@ -45,9 +45,3 @@ export function get_next_type_error(file: string) {
     return es[0];
   }
 }
-
-console.log(
-  get_next_type_error(
-    "/home/james/Projects/TS/remnote-new/client/src/js/ui/queue/Queue.tsx"
-  )
-);

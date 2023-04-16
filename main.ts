@@ -2,11 +2,7 @@ import { ChatCompletionRequestMessage } from "openai";
 import { chat } from "./openai";
 import * as R from "remeda";
 import { Success, Fail } from "./types/types";
-import {
-  parseText,
-  ParsedOutput,
-  parsedOutputToString,
-} from "./prompts/shared";
+import { parseText, ParsedOutput } from "./prompts/shared";
 import {
   createTypeErrorObservation,
   fixTypesPrompt,
@@ -92,7 +88,7 @@ async function main() {
   ];
 
   while (keepGoing) {
-    const { parsed } = await callGpt(prompt);
+    const { parsed, response } = await callGpt(prompt);
     if (!parsed) {
       console.log("No parsed output from GPT response");
       break;
@@ -103,7 +99,7 @@ async function main() {
 
     prompt.push({
       role: "system",
-      content: parsedOutputToString(parsed),
+      content: response.data.choices[0].message?.content || "",
     });
 
     if (!(await confirmContinue())) {

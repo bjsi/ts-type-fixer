@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import { z } from "zod";
+import { get_all_type_errors } from "../types";
 import { Fail, Success } from "../types/types";
 
 export const write_text_to_file_schema = z.object({
@@ -40,8 +41,17 @@ export function write_text_to_file(args: Args): Success<string> | Fail<string> {
     };
   }
 
+  const typeErrorsBefore = get_all_type_errors(file);
   const updatedContent = lines.join("\n");
   fs.writeFileSync(file, updatedContent, "utf-8");
+  const typeErrorsAfter = get_all_type_errors(file);
+  if (typeErrorsAfter.length > typeErrorsBefore.length) {
+    fs.writeFileSync(file, originalContent, "utf-8");
+    return {
+      success: false,
+      error: `There were additional type errors after writing to the file. Your changes were reverted.`,
+    };
+  }
 
   return {
     success: true,
