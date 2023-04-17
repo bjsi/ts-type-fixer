@@ -31,6 +31,7 @@ export function get_source_code_at_line(
     return {
       success: true,
       data: `
+...${startIndex} lines above...
 ${text}
 ...${lines.length - endIndex - 1} lines below...
 `.trim(),
@@ -42,12 +43,3 @@ ${text}
     };
   }
 }
-
-// console.log(
-//   get_source_code_at_line({
-//     file: "/home/james/Projects/TS/remnote-new/client/src/js/ui/queue/Queue.tsx",
-//     line: 957,
-//     numLinesOfContextBefore: 0,
-//     numLinesOfContextAfter: 2,
-//   })
-// );

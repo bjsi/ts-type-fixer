@@ -9,7 +9,7 @@ export const write_text_to_file_schema = z.object({
   mode: z.union([
     z.literal("insertIntoNewLineBefore"),
     z.literal("insertIntoNewLineAfter"),
-    z.literal("replaceLine"),
+    z.literal("replaceLines"),
   ]),
   lineNumber: z.number(),
 });
@@ -32,7 +32,7 @@ export function write_text_to_file(args: Args): Success<string> | Fail<string> {
     lines.splice(line, 0, ...newTextLines);
   } else if (mode === "insertIntoNewLineBefore") {
     lines.splice(line - 1, 0, ...newTextLines);
-  } else if (mode === "replaceLine") {
+  } else if (mode === "replaceLines") {
     lines.splice(line - 1, newTextLines.length, ...newTextLines);
   } else {
     return {
@@ -45,11 +45,12 @@ export function write_text_to_file(args: Args): Success<string> | Fail<string> {
   const updatedContent = lines.join("\n");
   fs.writeFileSync(file, updatedContent, "utf-8");
   const typeErrorsAfter = get_all_type_errors(file);
-  if (typeErrorsAfter.length > typeErrorsBefore.length) {
-    fs.writeFileSync(file, originalContent, "utf-8");
+  // TODO: maybe include type errors near the line that was changed?
+  if (typeErrorsAfter.length >= typeErrorsBefore.length) {
+    // fs.writeFileSync(file, originalContent, "utf-8");
     return {
       success: false,
-      error: `There were additional type errors after writing to the file. Your changes were reverted.`,
+      error: `Either the error was not fixed, or more errors were introduced`,
     };
   }
 

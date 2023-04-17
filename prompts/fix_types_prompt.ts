@@ -87,7 +87,7 @@ Action Input: the args for the action
 
 export const createTypeErrorObservation = (): ChatCompletionRequestMessage => {
   const typeError = get_next_type_error(
-    "/home/james/Projects/TS/remnote-new/client/src/js/ui/queue/Queue.tsx"
+    "/home/james/Projects/TS/remnote-new/client/src/js/ui/queue/SpacedRepetitionBase.tsx"
   );
   return {
     role: "user",
