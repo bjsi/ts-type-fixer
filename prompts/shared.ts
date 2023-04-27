@@ -56,6 +56,7 @@ export function parseText(text: string): ParsedOutput | null {
         (match: RegExpMatchArray) => {
           // couldn't get regex to work because of { } inside the JSON
           const actionInputStartIdx = match.index! + match[0].length;
+          debugger;
           const section = textSection.slice(actionInputStartIdx);
           let actionInputEndIdx: number = section.length;
           // dumb way to find the end of the JSON

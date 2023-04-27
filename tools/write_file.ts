@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import { z } from "zod";
-import { get_all_type_errors } from "../types";
+import { get_all_type_errors } from "./get_type_errors";
 import { Fail, Success } from "../types/types";
 
 export const write_text_to_file_schema = z.object({
@@ -45,12 +45,17 @@ export function write_text_to_file(args: Args): Success<string> | Fail<string> {
   const updatedContent = lines.join("\n");
   fs.writeFileSync(file, updatedContent, "utf-8");
   const typeErrorsAfter = get_all_type_errors(file);
-  // TODO: maybe include type errors near the line that was changed?
   if (typeErrorsAfter.length >= typeErrorsBefore.length) {
-    // fs.writeFileSync(file, originalContent, "utf-8");
+    const errsAtLine = typeErrorsAfter
+      .filter(
+        (err) =>
+          err.line != null && err.line >= line - 2 && err.line <= line + 2
+      )
+      .map((x) => x.error_message)
+      .join("\n\n");
     return {
       success: false,
-      error: `Either the error was not fixed, or more errors were introduced`,
+      error: `Either the error was not fixed, or more errors were introduced\n${errsAtLine}`,
     };
   }
 

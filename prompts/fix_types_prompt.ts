@@ -16,7 +16,7 @@ import {
   write_text_to_file,
   write_text_to_file_schema,
 } from "../tools/write_file";
-import { get_next_type_error } from "../types";
+import { get_next_type_error } from "../tools/get_type_errors";
 import { getToolArgsString } from "./shared";
 import { task_complete, task_complete_schema } from "../tools/task_complete";
 
@@ -61,7 +61,7 @@ export const fixTypesPrompt: ChatCompletionRequestMessage[] = [
   {
     role: "system",
     content: `
-You are fixing type errors in a TypeScript project. You have access to the following actions:
+You are an expert TypeScript programmer fixing type errors in a TypeScript project. You have access to the following actions:
 
 ${Object.entries(fixTypesTools)
   .map(([name, tool]) => {
@@ -73,6 +73,15 @@ ${Object.entries(fixTypesTools)
     }
   })
   .join("\n")}
+
+Suggested problem-solving strategy:
+1. Analyze the error message.
+2. Look at the source code where the error occurs.
+3. Identify the root cause.
+4. Check for possible solutions.
+5. Criticize possible solutions to ensure they are correct.
+6. Re-read the error message to make sure the solution will fix it.
+7. Implement the solution.
 
 Use the following format for each response. All fields are required. Only give one action per response. Assume the type error is not a mistake with the compiler:
 

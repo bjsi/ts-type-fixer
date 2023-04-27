@@ -85,4 +85,48 @@ Action Input: {
     ];
     expect(actual).toEqual(expected);
   });
+
+  it("sql action input", () => {
+    const t = `Action: run_sql
+Action Input: { "query": "SELECT COUNT(*) FROM survey WHERE top_four_flashcard_features_to_prioritize LIKE '%AI Flashcard Integrations%'"}`.trim();
+    const actual = parseText(t);
+    const expected = [
+      {
+        type: "Action",
+        data: "run_sql",
+      },
+      {
+        type: "Action Input",
+        data: {
+          query:
+            "SELECT COUNT(*) FROM survey WHERE top_four_flashcard_features_to_prioritize LIKE '%AI Flashcard Integrations%'",
+        },
+      },
+    ];
+    expect(actual).toEqual(expected);
+  });
+
+  it("aksjdnk", () => {
+    const x =
+      `Action Input: { "code": "import pandas as pd\\n# Read the JSON file into a pandas dataframe\\ndf = pd.read_json(\\"data.json\\")\\n# Sort the dataframe by the \\"avg_monthly_searches\\" column in descending order\\ndf_sorted = df.sort_values(\\"avg_monthly_searches\\", ascending=False)\\n# Take the first row to get the keyword with the highest average monthly searches\\nhighest_search_keyword = df_sorted.iloc[0][\\"keyword\\"]\\n# Print the result\\nprint(highest_search_keyword)" }`.trim();
+    const actual = parseText(x);
+
+    const expected = [
+      {
+        type: "Action Input",
+        data: {
+          code: `import pandas as pd
+# Read the JSON file into a pandas dataframe
+df = pd.read_json("data.json")
+# Sort the dataframe by the "avg_monthly_searches" column in descending order
+df_sorted = df.sort_values("avg_monthly_searches", ascending=False)
+# Take the first row to get the keyword with the highest average monthly searches
+highest_search_keyword = df_sorted.iloc[0]["keyword"]
+# Print the result\nprint(highest_search_keyword)
+`.trim(),
+        },
+      },
+    ];
+    expect(actual).toEqual(expected);
+  });
 });

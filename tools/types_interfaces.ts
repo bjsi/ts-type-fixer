@@ -6,14 +6,7 @@ import {
   TypeAliasDeclaration,
 } from "ts-morph";
 import { Fail, Success } from "../types/types";
-
-const project = new Project();
-project.addSourceFilesAtPaths(
-  "/home/james/Projects/TS/remnote-new/client/**/*.ts"
-);
-project.addSourceFilesAtPaths(
-  "/home/james/Projects/TS/remnote-new/client/**/*.tsx"
-);
+import { project } from "./shared";
 
 export const get_source_code_for_type_or_interface_schema = z.object({
   typeOrInterface: z.string(),
