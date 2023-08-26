@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import { z } from "zod";
-import { get_all_type_errors } from "./get_type_errors";
+import { get_all_type_errors } from "./getTypeErrors";
 import { Fail, Success } from "../types/types";
 
 export const write_text_to_file_schema = z.object({

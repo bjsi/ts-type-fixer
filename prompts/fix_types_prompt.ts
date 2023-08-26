@@ -1,7 +1,7 @@
 import {
   get_source_code_at_line,
   get_source_code_at_line_schema,
-} from "../tools/get_source_code";
+} from "../tools/getSourceCode";
 import {
   no_dir_search_schema,
   search,
@@ -10,15 +10,15 @@ import {
 import {
   get_source_code_for_type_or_interface,
   get_source_code_for_type_or_interface_schema,
-} from "../tools/types_interfaces";
+} from "../tools/getSourceCodeFor";
 import { ChatCompletionRequestMessage } from "openai";
 import {
   write_text_to_file,
   write_text_to_file_schema,
 } from "../tools/write_file";
-import { get_next_type_error } from "../tools/get_type_errors";
+import { get_next_type_error } from "../tools/getTypeErrors";
 import { getToolArgsString } from "./shared";
-import { task_complete, task_complete_schema } from "../tools/task_complete";
+import { task_complete, task_complete_schema } from "../tools/taskComplete";
 
 export const fixTypesTools = {
   search_all: {
@@ -57,11 +57,11 @@ export const fixTypesTools = {
   },
 };
 
-export const fixTypesPrompt: ChatCompletionRequestMessage[] = [
+export const fixTypesPromptOld: ChatCompletionRequestMessage[] = [
   {
     role: "system",
     content: `
-You are an expert TypeScript programmer fixing type errors in a TypeScript project. You have access to the following actions:
+You are an expert TypeScript programmer fixing type errors. You have access to the following actions:
 
 ${Object.entries(fixTypesTools)
   .map(([name, tool]) => {

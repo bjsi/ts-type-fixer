@@ -1,6 +1,6 @@
 import { Diagnostic, DiagnosticMessageChain, ts } from "ts-morph";
-import { get_source_code_at_line } from "./get_source_code";
-import { project } from "./shared";
+import { getSourceCode } from "./getSourceCode";
+import { project } from "./tsProject";
 
 export function diagnosticToTypeError(error: Diagnostic<ts.Diagnostic>) {
   const diagnostic = error.getMessageText();
@@ -24,7 +24,7 @@ export function diagnosticToTypeError(error: Diagnostic<ts.Diagnostic>) {
     error_message,
     file,
     line,
-    source: get_source_code_at_line({
+    source: getSourceCode.execute({
       file: file!,
       line: line!,
       numLinesOfContextAfter: 0,
