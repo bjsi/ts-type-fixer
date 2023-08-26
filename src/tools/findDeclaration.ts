@@ -86,7 +86,7 @@ export function getMatchingNodes(
   if (nodesWithMatchingName.length === 0) {
     return {
       success: false,
-      error: "Could not find type or interface",
+      error: "Could not find that code element.",
     };
   }
   return {
@@ -98,18 +98,18 @@ export function getMatchingNodes(
 export const findDeclaration = new Tool({
   name: "findDeclaration",
   description:
-    "Find where a particular thing (function, class, type, etc) is declared.",
+    "Find where a particular code element (function, class, type, etc) is declared.",
 
   inputSchema: z.object({
     name: z.string(),
     kind: z
       .array(z.enum(humanReadableKind))
       .optional()
-      .describe("Array of SyntaxKinds to filter by. Defaults to all kinds."),
+      .describe("Array of code elements to filter by. Defaults to any."),
     files: z
       .array(z.string())
       .optional()
-      .describe("Array of files to search in. Defaults to all files."),
+      .describe("Array of files to search in. Defaults to all."),
   }),
 
   execute: async ({ name, kind, files }) => {

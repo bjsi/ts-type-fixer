@@ -18,25 +18,29 @@ dotenv.config();
 (async () => {
   const messages = [
     OpenAIChatMessage.system(
-      "You are an expert TypeScript programmer fixing type errors. You can use one of the tools per problem solving step to help fix the error, but before each problem solving step you must reason step-by-step about what to do next."
+      "You are an expert TypeScript programmer fixing type errors in a codebase. " +
+        "Before each problem solving step you must reason step-by-step about what to do next. " +
+        "After reasoning, you must choose a tool to help you fix the type error. " +
+        "It's always better to pass more parameters to the tool than less because it makes the tool work much faster. "
     ),
   ];
 
-  while (true) {
-    const typeErr = await getNextTypeError(
-      "/home/james/Projects/TS/remnote-new/client/src/js/ui/queue/SpacedRepetitionBase.tsx"
-    );
-    if (!typeErr) {
-      console.log("No type errors");
-      break;
-    }
+  const typeErr = await getNextTypeError(
+    "/home/james/Projects/TS/remnote-new/client/src/js/api/queue/queue.ts"
+  );
+  if (!typeErr) {
+    console.log("No type errors");
+    return;
+  }
 
-    messages.push(OpenAIChatMessage.user(JSON.stringify(typeErr, null, 2)));
+  messages.push(OpenAIChatMessage.user(JSON.stringify(typeErr, null, 2)));
+
+  while (true) {
     const { tool, parameters, result, text } = await useToolOrGenerateText(
       new OpenAIChatModel({
         model: "gpt-4",
         temperature: 0,
-        maxCompletionTokens: 500,
+        maxCompletionTokens: 1000,
       }),
       [
         findDeclaration,
@@ -48,6 +52,7 @@ dotenv.config();
       ],
       OpenAIChatFunctionPrompt.forToolsCurried(messages)
     );
+    console.log(JSON.stringify(messages, null, 2));
 
     switch (tool) {
       case null: {
@@ -56,6 +61,9 @@ dotenv.config();
         break;
       }
       default:
+        console.log(
+          `TOOL: ${tool}\nPARAMETERS: ${JSON.stringify(parameters, null, 2)}\n`
+        );
         messages.push(OpenAIChatMessage.toolCall({ text, tool, parameters }));
         messages.push(OpenAIChatMessage.toolResult({ tool, result }));
     }

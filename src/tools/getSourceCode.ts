@@ -5,7 +5,7 @@ import { z } from "zod";
 export const getSourceCode = new Tool({
   name: "getSourceCode",
   description:
-    "Get the source code of a particular line in a file, with some lines of context before and after.",
+    "Get the source code of a particular line in a file, with context before and after.",
   inputSchema: z.object({
     file: z.string(),
     line: z.number(),

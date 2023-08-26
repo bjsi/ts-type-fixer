@@ -40,7 +40,9 @@ export async function getAllTypeErrors(file: string) {
 }
 
 export async function getNextTypeError(file: string) {
+  console.time("getAllTypeErrors");
   const errors = await getAllTypeErrors(file);
+  console.timeEnd("getAllTypeErrors");
   if (errors.length === 0) {
     return {
       message: "No type errors",
@@ -49,9 +51,3 @@ export async function getNextTypeError(file: string) {
     return errors[0];
   }
 }
-
-console.log(
-  getNextTypeError(
-    "/home/james/Projects/TS/remnote-new/client/src/js/ui/queue/SpacedRepetitionBase.tsx"
-  )
-);

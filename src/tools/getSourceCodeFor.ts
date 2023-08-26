@@ -21,7 +21,7 @@ export const get_source_code_for_type_or_interface_schema = z.object({
 export const getSourceCodeFor = new Tool({
   name: "getSourceCodeFor",
   description:
-    "Get the source code for a particular declaration (type, interface, function etc).",
+    "Get the source code for a particular code element (type, interface, function etc).",
   inputSchema: z.object({
     name: z.string(),
     kind: z.enum(humanReadableKind),
