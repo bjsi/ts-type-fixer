@@ -2,7 +2,7 @@ import { Diagnostic, DiagnosticMessageChain, ts } from "ts-morph";
 import { getSourceCode } from "./getSourceCode";
 import { project } from "./tsProject";
 
-export function diagnosticToTypeError(error: Diagnostic<ts.Diagnostic>) {
+export async function diagnosticToTypeError(error: Diagnostic<ts.Diagnostic>) {
   const diagnostic = error.getMessageText();
   let error_message = "";
   if (typeof diagnostic === "string") {
@@ -24,7 +24,7 @@ export function diagnosticToTypeError(error: Diagnostic<ts.Diagnostic>) {
     error_message,
     file,
     line,
-    source: getSourceCode.execute({
+    source: await getSourceCode.execute({
       file: file!,
       line: line!,
       numLinesOfContextAfter: 0,
@@ -33,14 +33,14 @@ export function diagnosticToTypeError(error: Diagnostic<ts.Diagnostic>) {
   };
 }
 
-export function get_all_type_errors(file: string) {
+export async function getAllTypeErrors(file: string) {
   const srcFile = project.addSourceFileAtPath(file);
   const errors = srcFile.getPreEmitDiagnostics();
-  return errors.map(diagnosticToTypeError);
+  return await Promise.all(errors.map(diagnosticToTypeError));
 }
 
-export function get_next_type_error(file: string) {
-  const errors = get_all_type_errors(file);
+export async function getNextTypeError(file: string) {
+  const errors = await getAllTypeErrors(file);
   if (errors.length === 0) {
     return {
       message: "No type errors",
@@ -51,7 +51,7 @@ export function get_next_type_error(file: string) {
 }
 
 console.log(
-  get_next_type_error(
+  getNextTypeError(
     "/home/james/Projects/TS/remnote-new/client/src/js/ui/queue/SpacedRepetitionBase.tsx"
   )
 );

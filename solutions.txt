@@ -1,6 +1,0 @@
-General
-
-PROBLEM: Could not find a declaration file for module 'html-to-react'. '/home/james/Projects/TS/remnote-new/node_modules/html-to-react/index.js' implicitly has an 'any' type.\\nTry `npm i --save-dev @types/html-to-react` if it exists or add a new declaration (.d.ts) file containing `declare module 'html-to-react'
-SOLUTION: Insert // @ts-ignore above the import to ignore the warning
-
-RN specific

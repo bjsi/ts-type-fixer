@@ -8,7 +8,7 @@ export const task_complete_schema = z.object({
 });
 
 export const taskComplete = new Tool({
-  name: "task_complete",
+  name: "taskComplete",
   description: "Commit and push changes to git",
   inputSchema: task_complete_schema,
   execute: async (args) => {
