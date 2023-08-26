@@ -2,11 +2,9 @@ import {
   OpenAIChatFunctionPrompt,
   OpenAIChatMessage,
   OpenAIChatModel,
-  Tool,
   useToolOrGenerateText,
 } from "modelfusion";
 import dotenv from "dotenv";
-import { z } from "zod";
 import { findDeclaration } from "./tools/findDeclaration";
 import { getSourceCode } from "./tools/getSourceCode";
 import { getSourceCodeFor } from "./tools/getSourceCodeFor";
@@ -18,18 +16,6 @@ import { getNextTypeError } from "./tools/getTypeErrors";
 dotenv.config();
 
 (async () => {
-  const answer = new Tool({
-    name: "answer",
-    description: "Provide the final answer to the question",
-
-    inputSchema: z.object({
-      explanation: z.string().describe("The explanation of the answer."),
-      answer: z.string().describe("The answer to the question"),
-    }),
-
-    execute: async (result) => result,
-  });
-
   const messages = [
     OpenAIChatMessage.system(
       "You are an expert TypeScript programmer fixing type errors. You can use one of the tools per problem solving step to help fix the error, but before each problem solving step you must reason step-by-step about what to do next."

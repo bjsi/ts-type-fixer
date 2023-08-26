@@ -1,7 +1,6 @@
 import * as fs from "fs";
 import { z } from "zod";
 import { getAllTypeErrors } from "./getTypeErrors";
-import { Fail, Success } from "../types/types";
 import { Tool } from "modelfusion";
 
 export const write_text_to_file_schema = z.object({
