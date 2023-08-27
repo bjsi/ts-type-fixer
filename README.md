@@ -1,4 +1,4 @@
-# Typescript Type Fixer
+# TypeScript Type Fixer
 
 This an LLM agent whose goal is to help you fix typescript type errors. Warning: it's a work in progress.
 
@@ -22,4 +22,5 @@ This an LLM agent whose goal is to help you fix typescript type errors. Warning:
 
 ### Try to keep token usage reasonable
 
-- Don't just dump entire files into the prompt, instead give the agent tools to read specific parts of the codebase relevant to fixing the type error.
+- Don't go bankrupt dumping entire files into the prompt!
+- Instead give the agent tools to read specific parts of the codebase relevant to fixing the type error.
