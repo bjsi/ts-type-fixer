@@ -4,7 +4,7 @@ export let project: Project;
 
 // @ts-ignore
 if (!project) {
-  console.time("init project");
+  console.time("init big project");
   project = new Project({
     tsConfigFilePath:
       "/home/james/Projects/TS/remnote-new/client/tsconfig.json",
@@ -13,8 +13,9 @@ if (!project) {
   project.addSourceFilesAtPaths([
     "/home/james/Projects/TS/remnote-new/client/src/global.d.ts",
     "/home/james/Projects/TS/remnote-new/client/**/*.tsx",
+    "/home/james/Projects/TS/remnote-new/client/**/*.ts",
   ]);
-  console.timeEnd("init project");
+  console.timeEnd("init big project");
 }
 
 export function getProjectSourceFiles() {

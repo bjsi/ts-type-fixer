@@ -28,14 +28,18 @@ setGlobalFunctionObservers([loggingObserver]);
     ),
   ];
 
-  const typeErr = await trpc.getTypeErrorsInFile.query({
+  const typeErrs = await trpc.getTypeErrorsInFile.query({
     file: "/home/james/Projects/TS/remnote-new/client/src/js/api/queue/queue.ts",
   });
-  if (!typeErr) {
+  if (!typeErrs.success) {
+    console.log("Failed to get type errors");
+    return;
+  } else if (typeErrs.data.length === 0) {
     console.log("No type errors");
     return;
   }
 
+  const typeErr = typeErrs.data[0];
   messages.push(OpenAIChatMessage.user(JSON.stringify(typeErr, null, 2)));
 
   while (true) {

@@ -1,18 +1,17 @@
 import { WriteTextToFileArgs } from "../../shared/schemas/writeTextToFile";
 import { project } from "../tsProject";
-import { getTypeErrorsInFile } from "./getTypeErrors";
+import { getTypeErrorsInSourceFile } from "./getTypeErrors";
 
 export async function writeTextToFile(args: WriteTextToFileArgs) {
   const { file, lineNumber: line, text, mode } = args;
 
-  const sourceFile = project.getSourceFile(file);
+  const sourceFile = project.addSourceFileAtPath(file);
   if (!sourceFile) {
     return { success: false, error: `File does not exist: ${file}` };
   }
 
   const originalContent = sourceFile.getFullText();
   const lines = originalContent.split("\n");
-
   const newTextLines = text.split("\n");
 
   if (mode === "insertIntoNewLineAfter") {
@@ -29,9 +28,11 @@ export async function writeTextToFile(args: WriteTextToFileArgs) {
   }
 
   const updatedContent = lines.join("\n");
-  const errorsBefore = await getTypeErrorsInFile({ file });
+  const errorsBefore = await getTypeErrorsInSourceFile(sourceFile);
   sourceFile.replaceWithText(updatedContent);
-  const errorsAfter = await getTypeErrorsInFile({ file });
+  sourceFile.saveSync();
+  console.log("newText", updatedContent);
+  const errorsAfter = await getTypeErrorsInSourceFile(sourceFile);
   if (errorsBefore.length <= errorsAfter.length) {
     sourceFile.replaceWithText(originalContent);
     // within 2 lines of the write location
@@ -43,6 +44,8 @@ export async function writeTextToFile(args: WriteTextToFileArgs) {
       success: false,
       error: `Type errors were not reduced. Errors before: ${errorsBefore.length}, errors after: ${errorsAfter.length}\n\n${errorsAsStr}`,
     };
+  } else {
+    sourceFile.saveSync();
   }
 
   return {

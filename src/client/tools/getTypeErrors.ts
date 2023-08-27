@@ -11,22 +11,19 @@ export const getTypeErrorsInFile = new Tool({
   },
 });
 
-export const test = async () => {
-  const file =
-    "/home/james/Projects/TS/remnote-new/client/src/js/api/queue/queue.ts";
-  console.log(await trpc.getTypeErrorsInFile.query({ file }));
-};
+// export const test = async () => {
+//   const file =
+//     "/home/james/Projects/TS/remnote-new/client/src/js/api/queue/queue.ts";
+//   console.log(await trpc.getTypeErrorsInFile.query({ file }));
+//   console.log(
+//     await trpc.writeTextToFile.query({
+//       file: "/home/james/Projects/TS/remnote-new/client/src/js/api/queue/queue.ts",
+//       text: "let hello: number = 5;",
+//       lineNumber: 1,
+//       mode: "replaceLines",
+//     })
+//   );
+//   console.log(await trpc.getTypeErrorsInFile.query({ file }));
+// };
 
-// initProject(file);
-
-// getNextTypeError(file).then(async (typeErr) => {
-//   console.log(typeErr);
-//   const sourceFile = project.getSourceFile(file)!;
-//   const lines = sourceFile.getFullText().split("\n");
-//   lines[0] = "";
-//   sourceFile.replaceWithText(lines.join("\n"));
-
-//   getNextTypeError(file).then((typeErr) => {
-//     console.log(typeErr);
-//   });
-// });
+// test();

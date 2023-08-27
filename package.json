@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "dev": "NODE_OPTIONS=--max_old_space_size=4096 ts-node src/main.ts"
+    "server": "NODE_OPTIONS=--max_old_space_size=4096 ts-node src/server/index.ts",
+    "client": "ts-node src/client/index.ts"
   },
   "author": "",
   "license": "ISC",

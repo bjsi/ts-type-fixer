@@ -1,32 +1,41 @@
-import { Project, SourceFile, ts } from "ts-morph";
+import { SourceFile, ts } from "ts-morph";
 import { getSourceCode } from "../../client/tools/getSourceCode";
 import { GetTypeErrorsInFileArgs } from "../../shared/schemas/getTypeErrorsInFile";
+import { Fail, Success, success, fail } from "../../shared/types/types";
+import { project } from "../tsProject";
 
-let project: Project;
+// let project: Project;
 
-export const initProject = (file: string) => {
-  console.time("init type err project");
-  project = new Project({
-    tsConfigFilePath:
-      "/home/james/Projects/TS/remnote-new/client/tsconfig.json",
-    skipAddingFilesFromTsConfig: true,
-    compilerOptions: {
-      skipDefaultLibCheck: true,
-      skipLibCheck: true,
-      noEmit: true,
-    },
-  });
-  project.addSourceFilesAtPaths([
-    "/home/james/Projects/TS/remnote-new/client/src/global.d.ts",
-    file,
-  ]);
-  console.timeEnd("init type err project");
-};
+// export const initProject = (file: string) => {
+//   console.time("init type err project");
+//   project = new Project({
+//     tsConfigFilePath:
+//       "/home/james/Projects/TS/remnote-new/client/tsconfig.json",
+//     skipAddingFilesFromTsConfig: true,
+//     compilerOptions: {
+//       skipDefaultLibCheck: true,
+//       skipLibCheck: true,
+//       noEmit: true,
+//     },
+//   });
+//   project.addSourceFilesAtPaths([
+//     "/home/james/Projects/TS/remnote-new/client/src/global.d.ts",
+//     file,
+//   ]);
+//   console.timeEnd("init type err project");
+// };
+
+interface TypeErr {
+  error_message: string;
+  file: string;
+  line: number | undefined;
+  source: string | undefined;
+}
 
 export async function diagnosticToTypeError(
   file: SourceFile,
   error: ts.Diagnostic
-) {
+): Promise<TypeErr> {
   const diagnostic = error.messageText;
   let error_message = "";
   if (typeof diagnostic === "string") {
@@ -78,18 +87,29 @@ export async function diagnosticToTypeError(
     error_message,
     file: file.getFilePath()!,
     line,
-    source: await getSourceCode.execute({
-      file: file.getSourceFile().getFilePath()!,
-      line: line!,
-      numLinesOfContextAfter: 0,
-      numLinesOfContextBefore: 0,
-    }),
+    source: (
+      (await getSourceCode.execute({
+        file: file.getSourceFile().getFilePath()!,
+        line: line!,
+        numLinesOfContextAfter: 0,
+        numLinesOfContextBefore: 0,
+      })) as Success<string>
+    ).data,
   };
 }
 
-export async function getTypeErrorsInFile(args: GetTypeErrorsInFileArgs) {
+export async function getTypeErrorsInFile(
+  args: GetTypeErrorsInFileArgs
+): Promise<Fail<string> | Success<TypeErr[]>> {
   const { file } = args;
-  const sourceFile = project.addSourceFileAtPath(file);
+  const sourceFile = project.getSourceFile(file);
+  if (!sourceFile) {
+    return fail("File not found");
+  }
+  return success(await getTypeErrorsInSourceFile(sourceFile));
+}
+
+export async function getTypeErrorsInSourceFile(sourceFile: SourceFile) {
   const langService = project.getLanguageService().compilerObject;
   const errors = langService.getSemanticDiagnostics(sourceFile.getFilePath()!);
   return await Promise.all(
@@ -100,12 +120,18 @@ export async function getTypeErrorsInFile(args: GetTypeErrorsInFileArgs) {
 export async function getNextTypeError(file: string) {
   console.time("getAllTypeErrors");
   const errors = await getTypeErrorsInFile({ file });
+  if (!errors.success) {
+    return errors;
+  }
+
+  const data = errors.data;
+
   console.timeEnd("getAllTypeErrors");
-  if (errors.length === 0) {
+  if (data.length === 0) {
     return {
       message: "No type errors",
     };
   } else {
-    return errors[0];
+    return data[0];
   }
 }
