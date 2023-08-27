@@ -1,5 +1,6 @@
 import { Project, SourceFile, ts } from "ts-morph";
-import { getSourceCode } from "./getSourceCode";
+import { getSourceCode } from "../../client/tools/getSourceCode";
+import { GetTypeErrorsInFileArgs } from "../../shared/schemas/getTypeErrorsInFile";
 
 let project: Project;
 
@@ -86,7 +87,8 @@ export async function diagnosticToTypeError(
   };
 }
 
-export async function getAllTypeErrors(file: string) {
+export async function getTypeErrorsInFile(args: GetTypeErrorsInFileArgs) {
+  const { file } = args;
   const sourceFile = project.addSourceFileAtPath(file);
   const langService = project.getLanguageService().compilerObject;
   const errors = langService.getSemanticDiagnostics(sourceFile.getFilePath()!);
@@ -97,7 +99,7 @@ export async function getAllTypeErrors(file: string) {
 
 export async function getNextTypeError(file: string) {
   console.time("getAllTypeErrors");
-  const errors = await getAllTypeErrors(file);
+  const errors = await getTypeErrorsInFile({ file });
   console.timeEnd("getAllTypeErrors");
   if (errors.length === 0) {
     return {
@@ -107,20 +109,3 @@ export async function getNextTypeError(file: string) {
     return errors[0];
   }
 }
-
-const file =
-  "/home/james/Projects/TS/remnote-new/client/src/js/api/queue/queue.ts";
-
-initProject(file);
-
-getNextTypeError(file).then(async (typeErr) => {
-  console.log(typeErr);
-  const sourceFile = project.getSourceFile(file)!;
-  const lines = sourceFile.getFullText().split("\n");
-  lines[0] = "";
-  sourceFile.replaceWithText(lines.join("\n"));
-
-  getNextTypeError(file).then((typeErr) => {
-    console.log(typeErr);
-  });
-});

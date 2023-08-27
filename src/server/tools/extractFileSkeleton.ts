@@ -1,20 +1,16 @@
-// useful for asking gpt to help with a refactor of a large file
-// by removing all the implementation code and leaving only the "skeleton"
-
-import { Tool } from "modelfusion";
 import { ts } from "ts-morph";
-import { z } from "zod";
-import { project } from "./tsProject";
-
-function removeDuplicateEmptyLines(inputString: string) {
-  return inputString.replace(/\n\s*\n/g, "\n");
-}
+import { ExtractFileSkeletonArgs } from "../../shared/schemas/extractFileSkeleton";
+import { project } from "../tsProject";
 
 // TODO: line numbers - can't seem to get this working
 // need the original line numbers pre-transformation
 // try srcFile.refreshFromFilesystem
-export const extractFileSkeleton = (filePath: string) => {
+export const extractFileSkeleton = (args: ExtractFileSkeletonArgs) => {
+  const { filePath } = args;
   console.time("extractFileSkeleton");
+  function removeDuplicateEmptyLines(inputString: string) {
+    return inputString.replace(/\n\s*\n/g, "\n");
+  }
   const file = project.getSourceFile(filePath);
   if (!file) {
     return {
@@ -75,16 +71,3 @@ export const extractFileSkeleton = (filePath: string) => {
     data: removeDuplicateEmptyLines(file.getFullText()),
   };
 };
-
-export const extractFileSkeletonTool = new Tool({
-  name: "extractFileSkeleton",
-  description:
-    "Extract the skeleton of a file listing all functions, classes and types. Useful for getting a high-level overview of a file.",
-  inputSchema: z.object({
-    filePath: z.string(),
-  }),
-  execute: async (args) => {
-    const { filePath } = args;
-    return extractFileSkeleton(filePath);
-  },
-});

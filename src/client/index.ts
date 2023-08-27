@@ -1,6 +1,4 @@
 import {
-  FunctionEvent,
-  FunctionObserver,
   OpenAIChatFunctionPrompt,
   OpenAIChatMessage,
   OpenAIChatModel,
@@ -14,35 +12,11 @@ import { getSourceCodeFor } from "./tools/getSourceCodeFor";
 import { searchTool } from "./tools/search";
 import { taskComplete } from "./tools/taskComplete";
 import { writeTextToFile } from "./tools/writeFile";
-import { getNextTypeError } from "./tools/getTypeErrors";
+import { trpc } from "./trpc";
+import { loggingObserver } from "./logging";
 
 dotenv.config();
-
-const observer: FunctionObserver = {
-  onFunctionEvent(event: FunctionEvent) {
-    // you could also switch on e.g. event.functionType
-    switch (event.eventType) {
-      case "started": {
-        console.log(
-          `[${event.timestamp.toISOString()}] ${event.callId} - ${
-            event.functionType
-          } ${event.eventType}`
-        );
-        break;
-      }
-      case "finished": {
-        console.log(
-          `[${event.timestamp.toISOString()}] ${event.callId} - ${
-            event.functionType
-          } ${event.eventType} in ${event.durationInMs}ms`
-        );
-        break;
-      }
-    }
-  },
-};
-
-setGlobalFunctionObservers([observer]);
+setGlobalFunctionObservers([loggingObserver]);
 
 (async () => {
   const messages = [
@@ -54,9 +28,9 @@ setGlobalFunctionObservers([observer]);
     ),
   ];
 
-  const typeErr = await getNextTypeError(
-    "/home/james/Projects/TS/remnote-new/client/src/js/api/queue/queue.ts"
-  );
+  const typeErr = await trpc.getTypeErrorsInFile.query({
+    file: "/home/james/Projects/TS/remnote-new/client/src/js/api/queue/queue.ts",
+  });
   if (!typeErr) {
     console.log("No type errors");
     return;

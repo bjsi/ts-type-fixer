@@ -17,7 +17,7 @@ if (!project) {
   console.timeEnd("init project");
 }
 
-export function getSourceFiles() {
+export function getProjectSourceFiles() {
   return project
     .getSourceFiles()
     .filter(

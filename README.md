@@ -24,3 +24,8 @@ This an LLM agent whose goal is to help you fix typescript type errors. Warning:
 
 - Don't go bankrupt dumping entire files into the prompt!
 - Instead give the agent tools to read specific parts of the codebase relevant to fixing the type error.
+
+## Notes
+
+- I initialize the `ts-morph` project on the server which runs independently of the LLM interactions. This is because the `ts-morph` project can take a while to initialize for large projects. This setup makes testing and development much faster.
+- I only search files for semantic errors (aka type errors). Syntactic errors are not included.
