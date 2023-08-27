@@ -88,9 +88,8 @@ export async function diagnosticToTypeError(
 
 export async function getAllTypeErrors(file: string) {
   const sourceFile = project.addSourceFileAtPath(file);
-  const errors = project
-    .getLanguageService()
-    .compilerObject.getSemanticDiagnostics(file);
+  const langService = project.getLanguageService().compilerObject;
+  const errors = langService.getSemanticDiagnostics(sourceFile.getFilePath()!);
   return await Promise.all(
     errors.map((e) => diagnosticToTypeError(sourceFile, e))
   );
@@ -109,19 +108,19 @@ export async function getNextTypeError(file: string) {
   }
 }
 
-// const file =
-//   "/home/james/Projects/TS/remnote-new/client/src/js/api/queue/queue.ts";
+const file =
+  "/home/james/Projects/TS/remnote-new/client/src/js/api/queue/queue.ts";
 
-// initProject(file);
+initProject(file);
 
-// getNextTypeError(file).then(async (typeErr) => {
-//   console.log(typeErr);
-//   const sourceFile = project.getSourceFile(file)!;
-//   const lines = sourceFile.getFullText().split("\n");
-//   lines[0] = "";
-//   sourceFile.replaceWithText(lines.join("\n"));
+getNextTypeError(file).then(async (typeErr) => {
+  console.log(typeErr);
+  const sourceFile = project.getSourceFile(file)!;
+  const lines = sourceFile.getFullText().split("\n");
+  lines[0] = "";
+  sourceFile.replaceWithText(lines.join("\n"));
 
-//   getNextTypeError(file).then((typeErr) => {
-//     console.log(typeErr);
-//   });
-// });
+  getNextTypeError(file).then((typeErr) => {
+    console.log(typeErr);
+  });
+});
