@@ -12,6 +12,7 @@ function removeDuplicateEmptyLines(inputString: string) {
 
 // TODO: line numbers - can't seem to get this working
 // need the original line numbers pre-transformation
+// try srcFile.refreshFromFilesystem
 export const extractFileSkeleton = (filePath: string) => {
   console.time("extractFileSkeleton");
   const file = project.getSourceFile(filePath);

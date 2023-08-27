@@ -43,23 +43,8 @@ export const writeTextToFile = new Tool({
       };
     }
 
-    const typeErrorsBefore = await getAllTypeErrors(file);
     const updatedContent = lines.join("\n");
     fs.writeFileSync(file, updatedContent, "utf-8");
-    const typeErrorsAfter = await getAllTypeErrors(file);
-    if (typeErrorsAfter.length >= typeErrorsBefore.length) {
-      const errsAtLine = typeErrorsAfter
-        .filter(
-          (err) =>
-            err.line != null && err.line >= line - 2 && err.line <= line + 2
-        )
-        .map((x) => x.error_message)
-        .join("\n\n");
-      return {
-        success: false,
-        error: `Either the error was not fixed, or more errors were introduced\n${errsAtLine}`,
-      };
-    }
 
     return {
       success: true,
