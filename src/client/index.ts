@@ -43,6 +43,7 @@ setGlobalFunctionObservers([loggingObserver]);
   messages.push(OpenAIChatMessage.user(JSON.stringify(typeErr, null, 2)));
 
   while (true) {
+    console.log(JSON.stringify(messages, null, 2));
     const { tool, parameters, result, text } = await useToolOrGenerateText(
       new OpenAIChatModel({
         model: "gpt-4",
@@ -59,7 +60,6 @@ setGlobalFunctionObservers([loggingObserver]);
       ],
       OpenAIChatFunctionPrompt.forToolsCurried(messages)
     );
-    console.log(JSON.stringify(messages, null, 2));
 
     switch (tool) {
       case null: {
@@ -67,6 +67,9 @@ setGlobalFunctionObservers([loggingObserver]);
         messages.push(OpenAIChatMessage.assistant(text));
         break;
       }
+      case "taskComplete":
+        console.log(`TASK COMPLETE\n`);
+        break;
       default:
         console.log(
           `TOOL: ${tool}\nPARAMETERS: ${JSON.stringify(parameters, null, 2)}\n`

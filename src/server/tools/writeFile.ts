@@ -31,7 +31,6 @@ export async function writeTextToFile(args: WriteTextToFileArgs) {
   const errorsBefore = await getTypeErrorsInSourceFile(sourceFile);
   sourceFile.replaceWithText(updatedContent);
   sourceFile.saveSync();
-  console.log("newText", updatedContent);
   const errorsAfter = await getTypeErrorsInSourceFile(sourceFile);
   if (errorsBefore.length <= errorsAfter.length) {
     sourceFile.replaceWithText(originalContent);
