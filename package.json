@@ -5,15 +5,16 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "server": "NODE_OPTIONS=--max_old_space_size=4096 ts-node src/server/index.ts",
-    "client": "ts-node src/client/index.ts"
+    "server": "NODE_OPTIONS=--max_old_space_size=4096 nodemon --watch server -x 'ts-node src/server/index.ts'",
+    "client": "nodemon --watch client -x 'ts-node src/client/index.ts'"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^18.15.11",
     "jest": "^29.5.0",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "nodemon": "^3.0.1"
   },
   "dependencies": {
     "@trpc/client": "^10.38.0",
