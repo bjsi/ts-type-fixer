@@ -2,6 +2,7 @@ import {
   OpenAIChatFunctionPrompt,
   OpenAIChatMessage,
   OpenAIChatModel,
+  SchemaValidationError,
   setGlobalFunctionObservers,
   useToolOrGenerateText,
 } from "modelfusion";
@@ -29,7 +30,7 @@ setGlobalFunctionObservers([loggingObserver]);
   ];
 
   const typeErrs = await trpc.getTypeErrorsInFile.query({
-    file: "/home/james/Projects/TS/remnote-new/client/src/js/api/queue/queue.ts",
+    file: "/home/james/Projects/TS/remnote-new/client/src/js/api/component_focus/FocusableComponentContainer.tsx",
   });
   if (!typeErrs.success) {
     console.log("Failed to get type errors");
@@ -40,42 +41,58 @@ setGlobalFunctionObservers([loggingObserver]);
   }
 
   const typeErr = typeErrs.data[0];
-  messages.push(OpenAIChatMessage.user(JSON.stringify(typeErr, null, 2)));
+  messages.push(
+    OpenAIChatMessage.user(
+      "Here's the next type error to fix. Please look at the `source_code` field below to get context about the error:\n\n" +
+        JSON.stringify(typeErr, null, 2)
+    )
+  );
 
   while (true) {
     console.log(JSON.stringify(messages, null, 2));
-    const { tool, parameters, result, text } = await useToolOrGenerateText(
-      new OpenAIChatModel({
-        model: "gpt-4",
-        temperature: 0,
-        maxCompletionTokens: 1000,
-      }),
-      [
-        findDeclaration,
-        getSourceCode,
-        getSourceCodeFor,
-        searchTool,
-        writeTextToFile,
-        taskComplete,
-      ],
-      OpenAIChatFunctionPrompt.forToolsCurried(messages)
-    );
+    try {
+      const { tool, parameters, result, text } = await useToolOrGenerateText(
+        new OpenAIChatModel({
+          model: "gpt-4",
+          temperature: 0,
+          maxCompletionTokens: 1000,
+        }),
+        [
+          findDeclaration,
+          getSourceCode,
+          getSourceCodeFor,
+          searchTool,
+          writeTextToFile,
+          taskComplete,
+        ],
+        OpenAIChatFunctionPrompt.forToolsCurried(messages)
+      );
 
-    switch (tool) {
-      case null: {
-        console.log(`TEXT: ${result}\n`);
-        messages.push(OpenAIChatMessage.assistant(text));
-        break;
+      switch (tool) {
+        case null: {
+          console.log(`TEXT: ${result}\n`);
+          messages.push(OpenAIChatMessage.assistant(text));
+          break;
+        }
+        case "taskComplete":
+          console.log(`TASK COMPLETE\n`);
+          break;
+        default:
+          console.log(
+            `TOOL: ${tool}\nPARAMETERS: ${JSON.stringify(
+              parameters,
+              null,
+              2
+            )}\n`
+          );
+          messages.push(OpenAIChatMessage.toolCall({ text, tool, parameters }));
+          messages.push(OpenAIChatMessage.toolResult({ tool, result }));
       }
-      case "taskComplete":
-        console.log(`TASK COMPLETE\n`);
-        break;
-      default:
-        console.log(
-          `TOOL: ${tool}\nPARAMETERS: ${JSON.stringify(parameters, null, 2)}\n`
-        );
-        messages.push(OpenAIChatMessage.toolCall({ text, tool, parameters }));
-        messages.push(OpenAIChatMessage.toolResult({ tool, result }));
+    } catch (e) {
+      if (e instanceof SchemaValidationError) {
+        console.log(`Schema validation error: ${e.message}`);
+        messages.push(OpenAIChatMessage.system(e.message));
+      }
     }
   }
 })();

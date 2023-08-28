@@ -1,36 +1,9 @@
 import { SourceFile, ts } from "ts-morph";
-import { getSourceCode } from "../../client/tools/getSourceCode";
 import { GetTypeErrorsInFileArgs } from "../../shared/schemas/getTypeErrorsInFile";
+import { TypeErr } from "../../shared/schemas/typeErr";
 import { Fail, Success, success, fail } from "../../shared/types/types";
 import { project } from "../tsProject";
-
-// let project: Project;
-
-// export const initProject = (file: string) => {
-//   console.time("init type err project");
-//   project = new Project({
-//     tsConfigFilePath:
-//       "/home/james/Projects/TS/remnote-new/client/tsconfig.json",
-//     skipAddingFilesFromTsConfig: true,
-//     compilerOptions: {
-//       skipDefaultLibCheck: true,
-//       skipLibCheck: true,
-//       noEmit: true,
-//     },
-//   });
-//   project.addSourceFilesAtPaths([
-//     "/home/james/Projects/TS/remnote-new/client/src/global.d.ts",
-//     file,
-//   ]);
-//   console.timeEnd("init type err project");
-// };
-
-interface TypeErr {
-  error_message: string;
-  file: string;
-  line: number | undefined;
-  source: string | undefined;
-}
+import { getErrorContextHierarchy } from "./getErrorContext";
 
 export async function diagnosticToTypeError(
   file: SourceFile,
@@ -83,18 +56,17 @@ export async function diagnosticToTypeError(
 
   const line = getLineNumber();
 
-  return {
+  const errInfo = {
     error_message,
     file: file.getFilePath()!,
     line,
-    source: (
-      (await getSourceCode.execute({
-        file: file.getSourceFile().getFilePath()!,
-        line: line!,
-        numLinesOfContextAfter: 0,
-        numLinesOfContextBefore: 0,
-      })) as Success<string>
-    ).data,
+    pos: error.start,
+  };
+  const maybeCtx = getErrorContextHierarchy({ error: errInfo });
+  const source_code = maybeCtx.success ? maybeCtx.data : "";
+  return {
+    ...errInfo,
+    source_code: source_code,
   };
 }
 
