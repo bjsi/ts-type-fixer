@@ -15,6 +15,10 @@ import { taskComplete } from "./tools/taskComplete";
 import { writeTextToFile } from "./tools/writeFile";
 import { trpc } from "./trpc";
 import { loggingObserver } from "./logging";
+import { omit } from "remeda";
+import path from "path";
+import { writeFileSync } from "fs";
+const projectRoot = path.resolve(__dirname);
 
 dotenv.config();
 setGlobalFunctionObservers([loggingObserver]);
@@ -22,10 +26,9 @@ setGlobalFunctionObservers([loggingObserver]);
 (async () => {
   const messages = [
     OpenAIChatMessage.system(
-      "You are an expert TypeScript programmer fixing type errors in a codebase. " +
-        "Before each problem solving step you must reason step-by-step about what to do next. " +
-        "After reasoning, you must choose a tool to help you fix the type error. " +
-        "It's always better to pass more parameters to the tool than less because it makes the tool work much faster. "
+      `Two expert TypeScript programmers are fixing a type error. ` +
+        `Their type error solving strategy is as follows: 1) They read the error context source code thoroughly and note any details that could help solve the type error. ` +
+        `2) They debate the next step to take. 3) They agree on a next step and take it. `
     ),
   ];
 
@@ -41,15 +44,28 @@ setGlobalFunctionObservers([loggingObserver]);
   }
 
   const typeErr = typeErrs.data[0];
+  const context = typeErr.source_code;
+
   messages.push(
     OpenAIChatMessage.user(
-      "Here's the next type error to fix. Please look at the `source_code` field below to get context about the error:\n\n" +
-        JSON.stringify(typeErr, null, 2)
+      `Error:
+${JSON.stringify(omit(typeErr, ["source_code"]), null, 2)}
+
+Please look at the context below and reason about what to do next:
+
+Context:
+${context}
+`.trim()
     )
   );
 
+  const runId = new Date().toISOString();
+  const runLogFile = projectRoot + "/runs/" + runId + ".json";
+
   while (true) {
-    console.log(JSON.stringify(messages, null, 2));
+    const msgs = JSON.stringify(messages, null, 2);
+    console.log(msgs);
+    writeFileSync(runLogFile, msgs, "utf-8");
     try {
       const { tool, parameters, result, text } = await useToolOrGenerateText(
         new OpenAIChatModel({

@@ -2,6 +2,7 @@ import { exec } from "child_process";
 import { Tool } from "modelfusion";
 import { promisify } from "util";
 import { z } from "zod";
+import { projectDir } from "../consts";
 const execPromise = promisify(exec);
 
 async function exists(path: string, type: "f" | "d") {
@@ -19,8 +20,6 @@ export const searchTool = new Tool({
     query: z.string(),
     mode: z.union([z.literal("fuzzy"), z.literal("exact")]),
     file: z.string().optional(),
-    directory: z.string().optional(),
-    gitignore: z.string().optional(),
   }),
   execute: async (args) => {
     try {
@@ -31,18 +30,12 @@ export const searchTool = new Tool({
             "File not found. Please check the path. Did you forget to add the file extension?",
         };
       }
-      if (args.directory && !(await exists(args.directory, "d"))) {
-        return {
-          success: false,
-          error: "Directory not found. Please check the path.",
-        };
-      }
 
       const exact = `rg -n '${args.query}' ${
-        args.file ?? args.directory ?? "."
+        args.file ?? projectDir ?? "."
       } | head -n 21`;
       const fuzzy = `rg -n --glob '*.ts' --glob '*.tsx' . ${
-        args.file ?? args.directory ?? "."
+        args.file ?? projectDir ?? "."
       } | fzf --filter "${args.query}" | head -n 21`;
       const { stdout } = await execPromise(
         args.mode === "exact" ? exact : fuzzy

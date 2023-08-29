@@ -5,12 +5,14 @@ import {
   humanReadableToSyntaxKind,
   NodeType,
   Success,
+  syntaxKindToHumanReadable,
 } from "../../shared/types/types";
 import { getProjectSourceFiles } from "../tsProject";
 
 export function getPositionInfoFromNode(node: Node) {
   return {
-    line: node.getStartLineNumber(),
+    startLine: node.getStartLineNumber(),
+    endLine: node.getEndLineNumber(),
     file: node.getSourceFile().getFilePath(),
     code: node.getText().split("\n")[0],
     // @ts-ignore
@@ -20,8 +22,8 @@ export function getPositionInfoFromNode(node: Node) {
 
 export function getMatchingNodes(
   name: string,
-  kind: (typeof humanReadableKind)[number][],
-  files: string[]
+  kind?: (typeof humanReadableKind)[number][],
+  files?: string[]
 ): Success<Node<ts.Node>[]> | Fail<string> {
   const sourceFiles = getProjectSourceFiles().filter(
     (f) => !files || files?.includes(f.getFilePath())

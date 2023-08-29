@@ -28,7 +28,8 @@ function getNodeTextWithoutBody(
         text += " {\n";
         break;
       } else {
-        text += child.getText();
+        const addSpace = child.getKindName().endsWith("Keyword");
+        text += addSpace ? " " : "" + child.getText();
       }
     }
   } else if (node.isKind(ts.SyntaxKind.VariableStatement)) {

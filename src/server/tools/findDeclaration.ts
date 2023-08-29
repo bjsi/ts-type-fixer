@@ -1,15 +1,15 @@
-import { humanReadableKind } from "../../shared/types/types";
+import { FindDeclarationArgs } from "../../shared/schemas/findDeclaration";
 import { getMatchingNodes, getPositionInfoFromNode } from "./getMatchingNodes";
 
-export function findDeclaration(args: {
-  name: string;
-  kind?: (typeof humanReadableKind)[number][];
-  files?: string[];
-}) {
+export function findDeclaration(args: FindDeclarationArgs) {
   const { name, kind, files } = args;
   console.time("findDeclaration");
 
-  const maybeNodes = getMatchingNodes(name, kind || [], files || []);
+  const maybeNodes = getMatchingNodes(
+    name,
+    typeof kind === "string" ? [kind] : kind,
+    files
+  );
   if (!maybeNodes.success) {
     return maybeNodes;
   }

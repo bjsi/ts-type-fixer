@@ -31,7 +31,7 @@ export const humanReadableKind = [
 ] as const;
 
 export const humanReadableToSyntaxKind = {
-  ["function"]: ["FunctionDeclaration"],
+  ["function"]: ["FunctionDeclaration"], // TODO: named arrow functions
   ["class"]: ["ClassDeclaration"],
   ["type"]: [
     "InterfaceDeclaration",
@@ -40,7 +40,7 @@ export const humanReadableToSyntaxKind = {
     "ClassDeclaration",
   ],
   ["enum"]: ["EnumDeclaration"],
-  ["variable"]: ["VariableDeclaration"],
+  ["variable"]: ["VariableDeclaration"], // TODO: VariableStatement?
   ["parameter"]: ["Parameter"],
   ["property"]: ["PropertyDeclaration"],
 } as const;
