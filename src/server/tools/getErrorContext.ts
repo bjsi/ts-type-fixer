@@ -6,8 +6,26 @@ import {
   ClassDeclaration,
   FunctionDeclaration,
   VariableStatement,
+  Node,
+  InterfaceDeclaration,
+  TypeAliasDeclaration,
+  EnumDeclaration,
 } from "ts-morph";
 import { TypeErr } from "../../shared/schemas/typeErr";
+
+const recursivelyFilterChildren = (
+  node: Node<ts.Node>,
+  predicate: (node: Node<ts.Node>) => boolean
+) => {
+  let text = "";
+  for (const child of node.getChildren()) {
+    if (predicate(child)) {
+      text += "...\n" + child.getText() + "\n...\n";
+      text += recursivelyFilterChildren(child, predicate);
+    }
+  }
+  return text;
+};
 
 function getNodeTextWithoutBody(
   node:
@@ -15,6 +33,10 @@ function getNodeTextWithoutBody(
     | VariableStatement
     | ClassDeclaration
     | FunctionDeclaration
+    | InterfaceDeclaration
+    | TypeAliasDeclaration
+    | EnumDeclaration,
+  recursivelyFilterChildrenPredicate?: (node: Node<ts.Node>) => boolean
 ): string {
   let text = "";
 
@@ -26,6 +48,13 @@ function getNodeTextWithoutBody(
     for (const child of node.getChildren()) {
       if (child.isKind(ts.SyntaxKind.Block)) {
         text += " {\n";
+        // TODO:
+        // if (recursivelyFilterChildrenPredicate) {
+        //   text += recursivelyFilterChildren(
+        //     child,
+        //     recursivelyFilterChildrenPredicate
+        //   );
+        // }
         break;
       } else {
         const addSpace = child.getKindName().endsWith("Keyword");
@@ -52,6 +81,26 @@ function getNodeTextWithoutBody(
         }
       }
     }
+  } else if (
+    node.isKind(ts.SyntaxKind.InterfaceDeclaration) ||
+    node.isKind(ts.SyntaxKind.EnumDeclaration)
+  ) {
+    // for (const child of node.getChildren()) {
+    //   if (child.isKind(ts.SyntaxKind.Block)) {
+    //     text += " {\n";
+    //     if (recursivelyFilterChildrenPredicate) {
+    //       text += recursivelyFilterChildren(
+    //         child,
+    //         recursivelyFilterChildrenPredicate
+    //       );
+    //     }
+    //     text + "\n}\n";
+    //     break;
+    //   } else {
+    text += node.getText();
+    // }
+  } else if (node.isKind(ts.SyntaxKind.TypeAliasDeclaration)) {
+    text += node.getText();
   }
   return text.trim();
 }
@@ -69,6 +118,7 @@ export function getErrorContextHierarchy(args: {
   if (!error.pos || !errorNode) {
     return fail(`Error has no position info.`);
   }
+
   const ancestors = errorNode.getAncestors();
   const declarationAncestors = ancestors.filter((n) => {
     return (
@@ -85,9 +135,14 @@ export function getErrorContextHierarchy(args: {
     | FunctionDeclaration
   )[];
 
-  console.log(declarationAncestors.map((n) => n.getKindName()));
-
-  const contextArr = declarationAncestors.map(getNodeTextWithoutBody).reverse();
+  const recursivelyFilterChildrenPredicate = (node: Node<ts.Node>) => {
+    return node.getText().includes(errorNode.getText());
+  };
+  const contextArr = declarationAncestors
+    .map((anc) =>
+      getNodeTextWithoutBody(anc, recursivelyFilterChildrenPredicate)
+    )
+    .reverse();
 
   // make sure to include the line of the error node if it's not already included by a declaration ancestor
   if (ancestors.length === 0) {
@@ -108,9 +163,39 @@ export function getErrorContextHierarchy(args: {
     }
   }
 
-  const contextString = contextArr
+  const sourceFileAncestor = ancestors.find((n) =>
+    n.isKind(ts.SyntaxKind.SourceFile)
+  );
+
+  let contextStr = "";
+
+  // const types = (sourceFile.getDescendantsOfKind(ts.SyntaxKind.InterfaceDeclaration) as (
+  //   | InterfaceDeclaration
+  //   | TypeAliasDeclaration
+  //   | EnumDeclaration
+  // )[]
+  // )
+  //   .concat(
+  //     sourceFile.getDescendantsOfKind(ts.SyntaxKind.TypeAliasDeclaration)
+  //   )
+  //   .concat(sourceFile.getDescendantsOfKind(ts.SyntaxKind.EnumDeclaration))
+
+  //   for (const child of sourceFileChildren) {
+  //     if (ancestors.includes(child)) {
+  //       console.log("found first ancestor");
+  //       break;
+  //     } else if (
+  //       child.isKind(ts.SyntaxKind.InterfaceDeclaration) ||
+  //       child.isKind(ts.SyntaxKind.TypeAliasDeclaration) ||
+  //       child.isKind(ts.SyntaxKind.EnumDeclaration)
+  //     ) {
+  //       contextStr += getNodeTextWithoutBody(child) + "\n";
+  //     }
+  // }
+
+  contextStr += contextArr
     .flatMap((x) => ["\n// some lines omitted...\n", x])
     .join("");
 
-  return success(contextString);
+  return success(contextStr);
 }

@@ -61,7 +61,6 @@ export async function diagnosticToTypeError(
     file: file.getFilePath()!,
     line,
     pos: error.start,
-    length: error.length,
   };
 
   const maybeCtx = getErrorContextHierarchy({ error: errInfo });
@@ -109,3 +108,7 @@ export async function getNextTypeError(file: string) {
     return data[0];
   }
 }
+
+getNextTypeError(
+  "/home/james/Projects/TS/remnote-new/client/src/js/api/component_focus/FocusableComponentContainer.tsx"
+).then(console.log);
