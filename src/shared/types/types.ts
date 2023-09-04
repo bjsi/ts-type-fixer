@@ -60,6 +60,10 @@ for (const [humanReadable, syntaxKinds] of Object.entries(
   }
 }
 
-export const syntaxKinds = Object.values(humanReadableToSyntaxKind).flat();
-export type SyntaxKinds = (typeof ts.SyntaxKind)[(typeof syntaxKinds)[number]];
-export type NodeType = ImplementedKindToNodeMappings[SyntaxKinds];
+export const declarationSyntaxKinds = Object.values(
+  humanReadableToSyntaxKind
+).flat();
+export type DeclarationSyntaxKinds =
+  (typeof ts.SyntaxKind)[(typeof declarationSyntaxKinds)[number]];
+export type DeclarationNodeType =
+  ImplementedKindToNodeMappings[DeclarationSyntaxKinds];

@@ -1,5 +1,8 @@
 import { FindDeclarationArgs } from "../../shared/schemas/findDeclaration";
-import { getMatchingNodes, getPositionInfoFromNode } from "./getMatchingNodes";
+import {
+  getDeclarationInfoFromNode,
+  getMatchingNodes,
+} from "./getMatchingNodes";
 
 export function findDeclaration(args: FindDeclarationArgs) {
   const { name, kind, files } = args;
@@ -13,7 +16,7 @@ export function findDeclaration(args: FindDeclarationArgs) {
   if (!maybeNodes.success) {
     return maybeNodes;
   }
-  const info = maybeNodes.data.map(getPositionInfoFromNode);
+  const info = maybeNodes.data.map(getDeclarationInfoFromNode);
 
   const filteredInfo =
     info.length > 15
@@ -22,6 +25,8 @@ export function findDeclaration(args: FindDeclarationArgs) {
   console.timeEnd("findDeclaration");
   return {
     success: true,
-    data: JSON.stringify(filteredInfo, null, 2),
+    data:
+      `Note that the codebase may contain unrelated declarations with the same name.\n\n` +
+      JSON.stringify(filteredInfo, null, 2),
   };
 }

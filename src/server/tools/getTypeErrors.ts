@@ -61,7 +61,9 @@ export async function diagnosticToTypeError(
     file: file.getFilePath()!,
     line,
     pos: error.start,
+    length: error.length,
   };
+
   const maybeCtx = getErrorContextHierarchy({ error: errInfo });
   const source_code = maybeCtx.success ? maybeCtx.data : "";
   return {

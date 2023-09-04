@@ -1,9 +1,10 @@
 import { Node, ts } from "ts-morph";
+import * as R from "remeda";
 import {
   Fail,
   humanReadableKind,
   humanReadableToSyntaxKind,
-  NodeType,
+  DeclarationNodeType,
   Success,
   syntaxKindToHumanReadable,
 } from "../../shared/types/types";
@@ -20,11 +21,29 @@ export function getPositionInfoFromNode(node: Node) {
   };
 }
 
+const getSourceFilesForNodes = (nodes: Node<ts.Node>[]) => {
+  const files = nodes.map((n) => n.getSourceFile().getFilePath());
+  return R.uniq(R.compact(files));
+};
+
+export function getDeclarationInfoFromNode(node: DeclarationNodeType) {
+  const references = getSourceFilesForNodes(node.findReferencesAsNodes());
+  return {
+    ...getPositionInfoFromNode(node),
+    references:
+      references.length <= 5
+        ? references.join("\n")
+        : `${references.slice(0, 5).join("\n")}\n${
+            references.length - 5
+          } more...`,
+  };
+}
+
 export function getMatchingNodes(
   name: string,
   kind?: (typeof humanReadableKind)[number][],
   files?: string[]
-): Success<Node<ts.Node>[]> | Fail<string> {
+): Success<DeclarationNodeType[]> | Fail<string> {
   const sourceFiles = getProjectSourceFiles().filter(
     (f) => !files || files?.includes(f.getFilePath())
   );
@@ -42,8 +61,8 @@ export function getMatchingNodes(
     .flat();
 
   const nodesWithMatchingName = nodesWithMatchingKind.filter(
-    (n) => (n as NodeType).getName() === name
-  );
+    (n) => (n as DeclarationNodeType).getName() === name
+  ) as DeclarationNodeType[];
 
   if (nodesWithMatchingName.length === 0) {
     return {
