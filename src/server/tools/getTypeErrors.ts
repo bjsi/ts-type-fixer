@@ -63,17 +63,14 @@ export async function diagnosticToTypeError(
     pos: error.start,
   };
 
-  const maybeCtx = getErrorContextHierarchy({ error: errInfo });
-  const source_code = maybeCtx.success ? maybeCtx.data : "";
   return {
     ...errInfo,
-    source_code: source_code,
   };
 }
 
 export async function getTypeErrorsInFile(
   args: GetTypeErrorsInFileArgs
-): Promise<Fail<string> | Success<TypeErr[]>> {
+): Promise<Fail<string> | Success<Omit<TypeErr, "source_code">[]>> {
   const { file } = args;
   const sourceFile = project.getSourceFile(file);
   if (!sourceFile) {
@@ -105,10 +102,16 @@ export async function getNextTypeError(file: string) {
       message: "No type errors",
     };
   } else {
-    return data[0];
+    const err = data[0];
+    const maybeCtx = getErrorContextHierarchy({ error: err });
+    const source_code = maybeCtx.success ? maybeCtx.data : "";
+    return {
+      ...err,
+      source_code: source_code,
+    };
   }
 }
 
 getNextTypeError(
-  "/home/james/Projects/TS/remnote-new/client/src/js/api/component_focus/FocusableComponentContainer.tsx"
+  "/home/james/Projects/TS/remnote-new/client/src/js/ui/omnibar/slash_command_controller.tsx"
 ).then(console.log);

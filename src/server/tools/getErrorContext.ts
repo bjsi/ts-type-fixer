@@ -10,6 +10,7 @@ import {
   InterfaceDeclaration,
   TypeAliasDeclaration,
   EnumDeclaration,
+  MethodDeclaration,
 } from "ts-morph";
 import { TypeErr } from "../../shared/schemas/typeErr";
 
@@ -33,6 +34,7 @@ function getNodeTextWithoutBody(
     | VariableStatement
     | ClassDeclaration
     | FunctionDeclaration
+    | MethodDeclaration
     | InterfaceDeclaration
     | TypeAliasDeclaration
     | EnumDeclaration,
@@ -43,7 +45,7 @@ function getNodeTextWithoutBody(
   if (
     node.isKind(ts.SyntaxKind.ArrowFunction) ||
     node.isKind(ts.SyntaxKind.FunctionDeclaration) ||
-    node.isKind(ts.SyntaxKind.ClassDeclaration)
+    node.isKind(ts.SyntaxKind.MethodDeclaration)
   ) {
     for (const child of node.getChildren()) {
       if (child.isKind(ts.SyntaxKind.Block)) {
@@ -58,7 +60,18 @@ function getNodeTextWithoutBody(
         break;
       } else {
         const addSpace = child.getKindName().endsWith("Keyword");
-        text += addSpace ? " " : "" + child.getText();
+        text += (addSpace ? " " : "") + child.getText();
+      }
+    }
+  } else if (node.isKind(ts.SyntaxKind.ClassDeclaration)) {
+    const members = node.getMembers();
+    for (const child of node.getChildren()) {
+      if (members.some((m) => child.getPos() === m.getPos())) {
+        console.log("break");
+        break;
+      } else {
+        const addSpace = child.getKindName().endsWith("Keyword");
+        text += (addSpace ? " " : "") + child.getText();
       }
     }
   } else if (node.isKind(ts.SyntaxKind.VariableStatement)) {
@@ -122,6 +135,7 @@ export function getErrorContextHierarchy(args: {
   const ancestors = errorNode.getAncestors();
   const declarationAncestors = ancestors.filter((n) => {
     return (
+      n.isKind(ts.SyntaxKind.MethodDeclaration) ||
       n.isKind(ts.SyntaxKind.FunctionDeclaration) ||
       n.isKind(ts.SyntaxKind.ClassDeclaration) ||
       n.isKind(ts.SyntaxKind.VariableStatement) ||
@@ -133,14 +147,20 @@ export function getErrorContextHierarchy(args: {
     | VariableStatement
     | ClassDeclaration
     | FunctionDeclaration
+    | MethodDeclaration
   )[];
+
+  console.log(
+    "declarationAncestors",
+    declarationAncestors.map((n) => n.getKindName())
+  );
 
   const recursivelyFilterChildrenPredicate = (node: Node<ts.Node>) => {
     return node.getText().includes(errorNode.getText());
   };
   const contextArr = declarationAncestors
-    .map((anc) =>
-      getNodeTextWithoutBody(anc, recursivelyFilterChildrenPredicate)
+    .map(
+      (anc) => getNodeTextWithoutBody(anc) //recursivelyFilterChildrenPredicate)
     )
     .reverse();
 
@@ -150,8 +170,10 @@ export function getErrorContextHierarchy(args: {
       sourceFile.getFullText().split("\n")[errorNode.getStartLineNumber() - 1]
     );
   } else {
-    const blockIndex = ancestors.findIndex((n) =>
-      n.isKind(ts.SyntaxKind.Block)
+    const blockIndex = ancestors.findIndex(
+      (n) =>
+        n.isKind(ts.SyntaxKind.Block) ||
+        n.isKind(ts.SyntaxKind.ClassDeclaration)
     );
     const declIndex = ancestors.findIndex((n) =>
       n.isKind(ts.SyntaxKind.VariableDeclaration)
