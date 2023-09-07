@@ -191,33 +191,32 @@ export function getErrorContextHierarchy(args: {
 
   let contextStr = "";
 
-  // const types = (sourceFile.getDescendantsOfKind(ts.SyntaxKind.InterfaceDeclaration) as (
-  //   | InterfaceDeclaration
-  //   | TypeAliasDeclaration
-  //   | EnumDeclaration
-  // )[]
-  // )
-  //   .concat(
-  //     sourceFile.getDescendantsOfKind(ts.SyntaxKind.TypeAliasDeclaration)
-  //   )
-  //   .concat(sourceFile.getDescendantsOfKind(ts.SyntaxKind.EnumDeclaration))
+  const types: (
+    | InterfaceDeclaration
+    | TypeAliasDeclaration
+    | EnumDeclaration
+  )[] = [];
 
-  //   for (const child of sourceFileChildren) {
-  //     if (ancestors.includes(child)) {
-  //       console.log("found first ancestor");
-  //       break;
-  //     } else if (
-  //       child.isKind(ts.SyntaxKind.InterfaceDeclaration) ||
-  //       child.isKind(ts.SyntaxKind.TypeAliasDeclaration) ||
-  //       child.isKind(ts.SyntaxKind.EnumDeclaration)
-  //     ) {
-  //       contextStr += getNodeTextWithoutBody(child) + "\n";
-  //     }
-  // }
+  const ancestorPos = ancestors.map((a) => a.getPos());
+  // TODO: not working
+  const sourceFileChildren = sourceFile.getChildren();
+  for (const child of sourceFileChildren) {
+    if (ancestorPos.includes(child.getPos())) {
+      break;
+    }
 
-  contextStr += contextArr
-    .flatMap((x) => ["\n// some lines omitted...\n", x])
-    .join("");
+    if (
+      child.isKind(ts.SyntaxKind.InterfaceDeclaration) ||
+      child.isKind(ts.SyntaxKind.TypeAliasDeclaration) ||
+      child.isKind(ts.SyntaxKind.EnumDeclaration)
+    ) {
+      types.push(child);
+    }
+  }
+
+  contextStr +=
+    types.map((t) => t.getText()).join("\n\n") +
+    contextArr.flatMap((x) => ["\n// some lines omitted...\n", x]).join("");
 
   return success(contextStr);
 }

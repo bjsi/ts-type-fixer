@@ -98,20 +98,19 @@ export async function getNextTypeError(file: string) {
 
   console.timeEnd("getAllTypeErrors");
   if (data.length === 0) {
-    return {
-      message: "No type errors",
-    };
+    return fail("No type errors");
   } else {
     const err = data[0];
     const maybeCtx = getErrorContextHierarchy({ error: err });
     const source_code = maybeCtx.success ? maybeCtx.data : "";
-    return {
+    return success({
       ...err,
       source_code: source_code,
-    };
+    });
   }
 }
 
-getNextTypeError(
-  "/home/james/Projects/TS/remnote-new/client/src/js/ui/omnibar/slash_command_controller.tsx"
-).then(console.log);
+const file =
+  "/home/james/Projects/TS/remnote-new/client/src/js/api/component_focus/FocusableComponentContainer.tsx";
+
+getNextTypeError(file).then(console.log);

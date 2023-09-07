@@ -32,18 +32,15 @@ setGlobalFunctionObservers([loggingObserver]);
     ),
   ];
 
-  const typeErrs = await trpc.getTypeErrorsInFile.query({
+  const typeErrs = await trpc.getNextTypeErrorInFile.query({
     file: "/home/james/Projects/TS/remnote-new/client/src/js/api/component_focus/FocusableComponentContainer.tsx",
   });
   if (!typeErrs.success) {
     console.log("Failed to get type errors");
     return;
-  } else if (typeErrs.data.length === 0) {
-    console.log("No type errors");
-    return;
   }
 
-  const typeErr = typeErrs.data[0];
+  const typeErr = typeErrs.data;
   const context = typeErr.source_code;
 
   messages.push(

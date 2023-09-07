@@ -7,7 +7,7 @@ import { writeTextToFileSchema } from "../shared/schemas/writeTextToFile";
 import { extractFileSkeleton } from "./tools/extractFileSkeleton";
 import { findDeclaration } from "./tools/findDeclaration";
 import { getSourceCodeFor } from "./tools/getSourceCodeFor";
-import { getTypeErrorsInFile } from "./tools/getTypeErrors";
+import { getNextTypeError, getTypeErrorsInFile } from "./tools/getTypeErrors";
 import { writeTextToFile } from "./tools/writeFile";
 import { publicProcedure, router } from "./trpc";
 
@@ -16,6 +16,12 @@ const appRouter = router({
     .input(getSourceCodeForSchema)
     .query(async (ctx) => {
       return getSourceCodeFor(ctx.input);
+    }),
+
+  getNextTypeErrorInFile: publicProcedure
+    .input(getTypeErrorsInFileSchema)
+    .query(async (ctx) => {
+      return await getNextTypeError(ctx.input.file);
     }),
   getTypeErrorsInFile: publicProcedure
     .input(getTypeErrorsInFileSchema)
