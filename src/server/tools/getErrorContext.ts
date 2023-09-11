@@ -197,15 +197,13 @@ export function getErrorContextHierarchy(args: {
     | EnumDeclaration
   )[] = [];
 
-  const ancestorPos = ancestors.map((a) => a.getPos());
-  // TODO: not working
-  const sourceFileChildren = sourceFile.getChildren();
+  const declarationAncestorPos = declarationAncestors.map((a) => a.getPos());
+  const sourceFileChildren = sourceFile.getStatements();
   for (const child of sourceFileChildren) {
-    if (ancestorPos.includes(child.getPos())) {
+    if (declarationAncestorPos.includes(child.getPos())) {
+      console.log("breaking at ", child.getKindName());
       break;
-    }
-
-    if (
+    } else if (
       child.isKind(ts.SyntaxKind.InterfaceDeclaration) ||
       child.isKind(ts.SyntaxKind.TypeAliasDeclaration) ||
       child.isKind(ts.SyntaxKind.EnumDeclaration)
@@ -215,7 +213,9 @@ export function getErrorContextHierarchy(args: {
   }
 
   contextStr +=
-    types.map((t) => t.getText()).join("\n\n") +
+    types
+      .flatMap((t) => ["\n// some lines omitted...\n", t.getText()])
+      .join("") +
     contextArr.flatMap((x) => ["\n// some lines omitted...\n", x]).join("");
 
   return success(contextStr);

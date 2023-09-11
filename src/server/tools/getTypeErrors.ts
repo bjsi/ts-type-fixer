@@ -110,7 +110,7 @@ export async function getNextTypeError(file: string) {
   }
 }
 
-const file =
-  "/home/james/Projects/TS/remnote-new/client/src/js/api/component_focus/FocusableComponentContainer.tsx";
+// const file =
+//   "/home/james/Projects/TS/remnote-new/client/src/js/api/component_focus/FocusableComponentContainer.tsx";
 
-getNextTypeError(file).then(console.log);
+// getNextTypeError(file).then((e) => console.log(e.data.source_code));
