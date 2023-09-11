@@ -7,6 +7,8 @@ This an LLM agent whose goal is to help you fix typescript type errors. Warning:
 - Uses user defined tools to fix type errors in your local codebase.
 - Integrates with the `ts-morph` TypeScript compiler API to provide type information to the LLM agent.
 
+![meme](https://raw.githubusercontent.com/bjsi/ts-type-fixer/main/img/meme.png)
+
 ## Goals
 
 ### Automate the boring stuff
