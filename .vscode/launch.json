@@ -8,11 +8,16 @@
       "name": "ts-node",
       "type": "node",
       "request": "launch",
-      "args": ["main.ts"],
-      "runtimeArgs": ["-r", "ts-node/register"],
+      "args": ["${file}"],
+      "runtimeExecutable": "node",
+      "env": {
+        "NODE_OPTIONS": "--max_old_space_size=4096"
+      },
+      "runtimeArgs": ["--nolazy", "-r", "ts-node/register/transpile-only"],
       "cwd": "${workspaceRoot}",
       "protocol": "inspector",
-      "internalConsoleOptions": "openOnSessionStart"
+      "internalConsoleOptions": "openOnSessionStart",
+      "skipFiles": ["<node_internals>/**", "node_modules/**"]
     }
   ]
 }
