@@ -1,14 +1,6 @@
 import { project } from "../tsProject";
 import { Fail, fail, success, Success } from "../../shared/types/types";
-import {
-  ts,
-  ArrowFunction,
-  ClassDeclaration,
-  FunctionDeclaration,
-  VariableStatement,
-  MethodDeclaration,
-  Node,
-} from "ts-morph";
+import { ts, ClassDeclaration, Node } from "ts-morph";
 import { TypeErr } from "../../shared/schemas/typeErr";
 import { NodeTreeToLineNumberedText } from "../typescript/NodeTreeToLineNumberedText";
 
@@ -34,7 +26,6 @@ class ClassContext extends NodeTreeToLineNumberedText {
       const child = children[i];
       this.state.currentNode = child;
       if (members.some((m) => child.getPos() === m.getPos())) {
-        console.log("break");
         break;
       } else {
         this.appendTextWithLineNumber(child, child.getText());
@@ -83,7 +74,7 @@ class HierarchicalErrorContext extends NodeTreeToLineNumberedText {
     this.errorNode = errorNode;
   }
 
-  override getDescendants(): Node<ts.Node>[] {
+  override getNodes(): Node<ts.Node>[] {
     const ancestors = this.errorNode.getAncestors();
     const declarationAncestors = ancestors.filter((n) => {
       return (
@@ -94,19 +85,26 @@ class HierarchicalErrorContext extends NodeTreeToLineNumberedText {
         (n.isKind(ts.SyntaxKind.ArrowFunction) &&
           n.getParent()?.getKind() !== ts.SyntaxKind.VariableDeclaration)
       );
-    }) as (
-      | ArrowFunction
-      | VariableStatement
-      | ClassDeclaration
-      | FunctionDeclaration
-      | MethodDeclaration
-    )[];
-    const ret = declarationAncestors.reverse();
-    console.log(
-      "Declaration ancestors: ",
-      ret.map((n) => n.getKindName()).join(", ")
-    );
-    return ret;
+    });
+
+    declarationAncestors.reverse();
+
+    const declarationAncestorPos = declarationAncestors.map((a) => a.getPos());
+    const sourceFile = this.errorNode.getSourceFile();
+    const sourceFileChildren = sourceFile.getStatements();
+    let types: Node<ts.Node>[] = [];
+    for (const child of sourceFileChildren) {
+      if (declarationAncestorPos.includes(child.getPos())) {
+        break;
+      } else if (
+        child.isKind(ts.SyntaxKind.InterfaceDeclaration) ||
+        child.isKind(ts.SyntaxKind.TypeAliasDeclaration) ||
+        child.isKind(ts.SyntaxKind.EnumDeclaration)
+      ) {
+        types = types.concat(child.getDescendants());
+      }
+    }
+    return [...types, ...declarationAncestors];
   }
 
   override getText() {
@@ -140,35 +138,6 @@ class HierarchicalErrorContext extends NodeTreeToLineNumberedText {
       }
     }
 
-    //     const types: (
-    //       | InterfaceDeclaration
-    //       | TypeAliasDeclaration
-    //       | EnumDeclaration
-    //     )[] = [];
-
-    //     const declarationAncestorPos = declarationAncestors.map((a) => a.getPos());
-    //     const sourceFileChildren = sourceFile.getStatements();
-    //     for (const child of sourceFileChildren) {
-    //       if (declarationAncestorPos.includes(child.getPos())) {
-    //         console.log("breaking at ", child.getKindName());
-    //         break;
-    //       } else if (
-    //         child.isKind(ts.SyntaxKind.InterfaceDeclaration) ||
-    //         child.isKind(ts.SyntaxKind.TypeAliasDeclaration) ||
-    //         child.isKind(ts.SyntaxKind.EnumDeclaration)
-    //       ) {
-    //         types.push(child);
-    //       }
-    //     }
-
-    //     contextStr +=
-    //       types
-    //         .flatMap((typeNode) => [
-    //           "\n// some lines omitted...\n",
-    //           getNodeTextWithLineNumbers(typeNode),
-    //         ])
-    //         .join("") +
-    //       contextArr.flatMap((x) => ["\n// some lines omitted...\n", x]).join("");
     return this.state.text;
   }
 
@@ -202,7 +171,6 @@ export function getErrorContextHierarchy(args: {
   try {
     const ctx = new HierarchicalErrorContext(args.error);
     const text = ctx.getText();
-    debugger;
     return success(text);
   } catch (e) {
     return fail((e as any).message);

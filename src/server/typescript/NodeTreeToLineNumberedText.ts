@@ -19,8 +19,6 @@ export interface NodeTreeToLineNumberedTextState {
  * WARNING: only works as long as you don't update file content during traversal!
  */
 export abstract class NodeTreeToLineNumberedText {
-  name: string;
-
   protected state: NodeTreeToLineNumberedTextState;
 
   constructor(args: { startNode: Node<ts.Node> }) {
@@ -46,9 +44,11 @@ export abstract class NodeTreeToLineNumberedText {
   protected updateAndAppendLineNumber() {
     const lineNumber = this.state.currentNode.getStartLineNumber();
     if (lineNumber !== this.state.lastLineNumber) {
-      this.state.text +=
-        (this.state.text ? "\n" : "") +
-        `${lineNumber}:\t${this.state.currentNode.getIndentationText()}`;
+      this.state.text += this.state.text ? "\n" : "";
+      if (lineNumber - (this.state.lastLineNumber ?? 0) > 1) {
+        this.state.text += "some lines omitted...\n";
+      }
+      this.state.text += `${lineNumber}:\t${this.state.currentNode.getIndentationText()}`;
       this.state.lastLineNumber = lineNumber;
     }
   }
@@ -61,19 +61,19 @@ export abstract class NodeTreeToLineNumberedText {
   }
 
   protected toLineNumberedText() {
-    const descendants = this.getDescendants();
-    for (const child of descendants) {
-      this.state.currentNode = child;
+    const nodes = this.getNodes();
+    for (const node of nodes) {
+      this.state.currentNode = node;
       if (this.state.stopped) {
         break;
       } else if (this.handleNode()) {
-        this.state.prevNode = child;
+        this.state.prevNode = node;
         continue;
-      } else if (child.getChildren().length > 0) {
+      } else if (node.getChildren().length > 0) {
         // not leaf node, so skip
         continue;
       } else if (
-        child.getFirstAncestor((an) =>
+        node.getFirstAncestor((an) =>
           this.state.skipDescendantsOf.has(getNodeId(an))
         )
       ) {
@@ -83,15 +83,15 @@ export abstract class NodeTreeToLineNumberedText {
         this.updateAndAppendLineNumber();
         const addSpace =
           this.state.prevNode &&
-          this.state.prevNode.getEnd() !== child.getStart();
-        this.state.text += (addSpace ? " " : "") + child.getText();
-        this.state.prevNode = child;
+          this.state.prevNode.getEnd() !== node.getStart();
+        this.state.text += (addSpace ? " " : "") + node.getText();
+        this.state.prevNode = node;
       }
     }
   }
 
-  getDescendants(): Node<ts.Node>[] {
-    return R.uniqBy(this.state.startNode.getDescendants(), getNodeId);
+  getNodes(): Node<ts.Node>[] {
+    return this.state.startNode.getDescendants();
   }
 
   /**
@@ -121,8 +121,7 @@ export abstract class NodeTreeToLineNumberedText {
 
   subTraverse(traverser: NodeTreeToLineNumberedText) {
     traverser.copyStateFrom(this, ["lastLineNumber", "text", "prevNode"]);
-    const text = traverser.getText();
-    console.log(traverser.name, "produced", text);
+    traverser.getText();
     this.copyStateFrom(traverser, [
       "currentNode",
       "prevNode",
