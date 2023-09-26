@@ -1,5 +1,6 @@
-import { Project, SourceFile } from "ts-morph";
+import { Project, SourceFile, ts } from "ts-morph";
 import * as child_process from "child_process";
+import path from "path";
 
 export let project: Project;
 
@@ -9,33 +10,26 @@ export interface InitTypeScriptProjectConfig {
 }
 
 export interface InitInMemoryProjectConfig {
-  sourceFiles: Record<string, string>;
+  directory: string;
 }
 
 export const initTestProject = (args: InitInMemoryProjectConfig) => {
-  if (project) {
-    console.log("project already exists!");
-    return;
-  }
+  console.time("init test project");
   project = new Project({
-    useInMemoryFileSystem: true,
     compilerOptions: {
-      lib: ["lib.es2015.d.ts"],
+      target: ts.ScriptTarget.ES2015,
       strict: true,
     },
+    tsConfigFilePath: "tsconfig.json",
   });
+  const testDir = path.join(__dirname, "client/src/tests/" + args.directory);
+  project.addSourceFilesAtPaths(testDir + "/**/*.ts");
 
-  for (const [filepath, content] of Object.entries(args.sourceFiles)) {
-    project.createSourceFile(filepath, content);
-  }
+  console.timeEnd("init test project");
 };
 
 export const initRealProject = (config: InitTypeScriptProjectConfig) => {
   console.time("init project");
-  if (project) {
-    console.log("project already exists!");
-    return;
-  }
   project = new Project({
     tsConfigFilePath: config.tsConfigFilePath,
     skipAddingFilesFromTsConfig: true,

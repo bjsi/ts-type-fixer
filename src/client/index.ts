@@ -3,7 +3,6 @@ import dotenv from "dotenv";
 import { loggingObserver } from "./logging";
 import { fixNextTypeError } from "./fixTypeError";
 import { trpc } from "./trpc";
-import { usedWrongInterfaceTest } from "./tests/usedWrongInterfaceTest";
 
 dotenv.config();
 setGlobalFunctionObservers([loggingObserver]);
@@ -19,12 +18,12 @@ const main = async () => {
 
   console.log("Running in " + mode + " mode");
   if (mode === "test") {
-    const test = usedWrongInterfaceTest;
+    const test = "used-wrong-interface";
     await trpc.initTestProject.query({
-      sourceFiles: test.files,
+      directory: test,
     });
     await fixNextTypeError({
-      startFile: test.startFile,
+      startFile: "main.ts",
       runLoggingEnabled: false,
     });
   } else {

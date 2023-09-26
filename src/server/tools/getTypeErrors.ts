@@ -2,7 +2,7 @@ import { SourceFile, ts } from "ts-morph";
 import { GetTypeErrorsInFileArgs } from "../../shared/schemas/getTypeErrorsInFile";
 import { TypeErr } from "../../shared/schemas/typeErr";
 import { Fail, Success, success, fail } from "../../shared/types/types";
-import { initRealProject, project } from "../tsProject";
+import { project } from "../tsProject";
 import { getErrorContextHierarchy } from "./getErrorContext";
 
 export async function diagnosticToTypeError(
@@ -110,20 +110,20 @@ export async function getNextTypeError(file: string) {
   }
 }
 
-(async () => {
-  const file =
-    "/home/james/Projects/TS/remnote-new/client/src/js/api/component_focus/FocusableComponentContainer.tsx";
+// (async () => {
+//   const file =
+//     "/home/james/Projects/TS/remnote-new/client/src/js/api/component_focus/FocusableComponentContainer.tsx";
 
-  initRealProject({
-    sourceFiles: [
-      "/home/james/Projects/TS/remnote-new/client/src/global.d.ts",
-      "/home/james/Projects/TS/remnote-new/client/**/*.tsx",
-      "/home/james/Projects/TS/remnote-new/client/**/*.ts",
-    ],
-    tsConfigFilePath:
-      "/home/james/Projects/TS/remnote-new/client/tsconfig.json",
-  });
-  getNextTypeError(file).then((e) => {
-    console.log(JSON.stringify(e, null, 2));
-  });
-})();
+//   initRealProject({
+//     sourceFiles: [
+//       "/home/james/Projects/TS/remnote-new/client/src/global.d.ts",
+//       "/home/james/Projects/TS/remnote-new/client/**/*.tsx",
+//       "/home/james/Projects/TS/remnote-new/client/**/*.ts",
+//     ],
+//     tsConfigFilePath:
+//       "/home/james/Projects/TS/remnote-new/client/tsconfig.json",
+//   });
+//   getNextTypeError(file).then((e) => {
+//     console.log(JSON.stringify(e, null, 2));
+//   });
+// })();

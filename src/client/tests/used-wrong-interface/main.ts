@@ -1,8 +1,3 @@
-const startFile = "FocusableComponentContainer.ts";
-export const usedWrongInterfaceTest = {
-  startFile: startFile,
-  files: {
-    startFile: `
 export interface FocusableComponentContainerProps {
   externalIsInFocus?: boolean;
 }
@@ -12,9 +7,9 @@ export interface FocusableComponentContainerTrackerProps
   isInFocus?: boolean;
 }
 
-type TrackerProps = FocusableComponentContainerProps;
+type TrackerProps = FocusableComponentContainerTrackerProps;
 
-function FocusableComponentContainer<
+export function FocusableComponentContainer<
   ExternalProps extends FocusableComponentContainerProps,
   TrackerProps extends FocusableComponentContainerProps
 >() {
@@ -27,8 +22,3 @@ function FocusableComponentContainer<
   };
   // ... more code
 }
-
-export default FocusableComponentContainer;
-`.trim(),
-  },
-};

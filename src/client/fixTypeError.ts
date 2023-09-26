@@ -29,7 +29,7 @@ export const fixNextTypeError = async (config: FixNextTypeErrorConfig) => {
     OpenAIChatMessage.system(
       `Two expert TypeScript programmers are fixing a type error. ` +
         `Their type error solving strategy is as follows: 1) They read the error context source code thoroughly and note any details that could help solve the type error. ` +
-        `2) They debate the next step to take. 3) They agree on a next step and take it. `
+        `2) They come up with hypotheses and debate the best way to fix the error. 3) They agree on a next step and take it.`
     ),
   ];
 
