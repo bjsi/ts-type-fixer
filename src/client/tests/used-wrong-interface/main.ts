@@ -7,8 +7,6 @@ export interface FocusableComponentContainerTrackerProps
   isInFocus?: boolean;
 }
 
-type TrackerProps = FocusableComponentContainerTrackerProps;
-
 export function FocusableComponentContainer<
   ExternalProps extends FocusableComponentContainerProps,
   TrackerProps extends FocusableComponentContainerProps
